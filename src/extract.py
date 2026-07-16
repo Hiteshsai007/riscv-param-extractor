@@ -76,7 +76,7 @@ def _parse_yaml_from_response(response_text: str) -> list[dict[str, Any]]:
     """
     # Try to extract YAML from markdown code fences
     yaml_match = re.search(
-        r'```(?:yaml|YAML)?\s*\n(.*?)```',
+        r'```(?:yaml|YAML)?\s*(.*?)\s*```',
         response_text,
         re.DOTALL,
     )
@@ -243,6 +243,9 @@ def extract_from_snippet(
 
     for param_dict in parsed_params:
         try:
+            if not isinstance(param_dict, dict):
+                raise TypeError(f"Expected dict for parameter, got {type(param_dict).__name__}: {param_dict}")
+                
             # Pydantic schema validation
             param = Parameter(**param_dict)
 
@@ -261,13 +264,14 @@ def extract_from_snippet(
                 )
 
         except Exception as e:
+            param_name = param_dict.get("name", "UNKNOWN") if isinstance(param_dict, dict) else "UNKNOWN"
             logger.warning(
                 "Schema validation failed for parameter: %s — Error: %s",
-                param_dict.get("name", "UNKNOWN"),
+                param_name,
                 e,
             )
             hallucination_flags.append(
-                f"SCHEMA_INVALID: {param_dict.get('name', 'UNKNOWN')} — {e}"
+                f"SCHEMA_INVALID: {param_name} — {e}"
             )
 
     logger.info(

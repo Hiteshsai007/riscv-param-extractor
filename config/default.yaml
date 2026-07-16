@@ -22,7 +22,7 @@ pipeline:
   output_dir: "results/"
 
 prompt:
-  version: "v1_baseline"   # Active prompt version (references prompts/ directory)
+  version: "v2_few_shot"   # Active prompt version (references prompts/ directory)
   system_role: "system"     # Prompt role for system instructions
   user_role: "user"         # Prompt role for user content
 

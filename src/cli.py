@@ -148,7 +148,7 @@ def run_extraction(args: argparse.Namespace) -> None:
         result_path = run_dir / f"{snippet_path.stem}.yaml"
         with open(result_path, "w", encoding="utf-8") as f:
             yaml.dump(
-                result.model_dump(),
+                result.model_dump(mode="json"),
                 f,
                 default_flow_style=False,
                 sort_keys=False,
