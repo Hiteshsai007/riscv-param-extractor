@@ -1,0 +1,12 @@
+# Gold label for: csr_address_encoding.txt
+# Classification: NEGATIVE — fixed structural convention, NOT a parameter
+
+snippet_file: data/raw_snippets/csr_address_encoding.txt
+source_section: "Privileged Spec, CSR Address Mapping Conventions §priv-csrs"
+expected_parameters: []
+notes: >
+  This is the canonical negative example from the challenge.
+  The 12-bit CSR encoding space and the bit allocation convention are
+  FIXED structural conventions defined by the spec — they are identical
+  across all implementations. No implementation variability exists here.
+  The word "convention" itself signals this is not a parameter.

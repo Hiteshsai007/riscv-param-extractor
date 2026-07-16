@@ -1,0 +1,25 @@
+# Gold label for: wlrl_field_behavior.txt
+# Classification: POSITIVE — WLRL fields have implementation-defined legal value subsets
+
+snippet_file: data/raw_snippets/wlrl_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+expected_parameters:
+  - name: "wlrl_supported_values"
+    description: "WLRL CSR fields specify behavior for only a subset of possible bit encodings, with other encodings reserved. The implementation defines which values are legal."
+    type: "field_behavior"
+    constraints: "Software should not write illegal values. Hardware implementations need only implement enough state bits to differentiate between supported values."
+    evidence: "Some read/write CSR fields specify behavior for only a subset of possible bit encodings, with other bit encodings reserved."
+    trigger_keyword: "WLRL"
+    source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+    confidence: "high"
+  - name: "wlrl_illegal_write_exception"
+    description: "Whether the implementation raises an illegal-instruction exception when software writes a non-supported value to a WLRL field."
+    type: "boolean"
+    constraints: "Permitted but not required — implementation choice."
+    evidence: "Implementations are permitted but not required to raise an illegal-instruction exception if an instruction attempts to write a non-supported value to a WLRL field."
+    trigger_keyword: "may"
+    source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+    confidence: "high"
+notes: >
+  Two parameters: (1) which values are legal (enumerated per-field), and
+  (2) whether illegal writes raise exceptions (boolean choice).

@@ -1,0 +1,31 @@
+# Default pipeline configuration
+# All generation parameters externalized here for reproducibility (NFR-2)
+
+model:
+  name: "qwen2.5:7b-instruct"          # Ollama model tag
+  provider: "ollama"                     # "ollama" | "together" | "openrouter"
+  base_url: "http://localhost:11434"     # Ollama default endpoint
+  api_key: null                          # Only needed for hosted APIs
+
+generation:
+  temperature: 0.0          # Extraction is retrieval, not creative — near-zero for reproducibility
+  top_p: 1.0                # Irrelevant at temperature=0, kept for documentation
+  repetition_penalty: 1.0   # No penalty — technical terminology must not be distorted
+  max_tokens: 4096          # Sized for schema × ~10 candidate parameters per snippet
+  seed: 42                  # Fixed seed for reproducibility
+  num_ctx: 8192             # Context window — full section, not per-sentence chunks
+
+pipeline:
+  pass1_method: "regex"     # Deterministic candidate detection (no LLM call)
+  max_retries: 2            # Retry on malformed LLM output before logging failure
+  retry_delay_seconds: 1    # Delay between retries
+  output_dir: "results/"
+
+prompt:
+  version: "v1_baseline"   # Active prompt version (references prompts/ directory)
+  system_role: "system"     # Prompt role for system instructions
+  user_role: "user"         # Prompt role for user content
+
+logging:
+  level: "INFO"             # DEBUG | INFO | WARNING | ERROR
+  log_file: "results/pipeline.log"

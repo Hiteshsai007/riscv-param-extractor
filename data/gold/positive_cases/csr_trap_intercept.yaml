@@ -1,0 +1,18 @@
+# Gold label for: csr_trap_intercept.txt
+# Classification: POSITIVE — optional hardware capability
+
+snippet_file: data/raw_snippets/csr_trap_intercept.txt
+source_section: "Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE)"
+expected_parameters:
+  - name: "csr_access_trap_capability"
+    description: "Implementations may optionally allow a more-privileged level to trap otherwise permitted CSR accesses by a less-privileged level, enabling trap-and-emulate virtualization."
+    type: "capability"
+    constraints: "If implemented, the change must be transparent to the less-privileged software."
+    evidence: "Implementations might allow a more-privileged level to trap otherwise permitted CSR accesses by a less-privileged level"
+    trigger_keyword: "might"
+    source_section: "Privileged Spec, CSR Address Mapping Conventions §priv-csrs"
+    confidence: "high"
+notes: >
+  This is the harder positive example from the PRD. It's buried in a NOTE/callout
+  box, uses "might" (weaker than "may"), and has a constraint ("transparent to
+  less-privileged software"). The pipeline must catch this pattern.

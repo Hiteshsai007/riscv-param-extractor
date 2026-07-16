@@ -1,0 +1,23 @@
+# Gold label for: cache_block_size.txt
+# Classification: POSITIVE — genuine architectural parameter
+
+snippet_file: data/raw_snippets/cache_block_size.txt
+source_section: "Unprivileged Spec, CMO §cmo"
+expected_parameters:
+  - name: "cache_block_size"
+    description: "The size of a cache block, which is implementation-specific and determines the granularity of cache management operations."
+    type: "numeric_range"
+    constraints: "Must be a naturally aligned power-of-two (NAPOT). Must be uniform throughout the system in initial CMO extensions."
+    evidence: "the size of a cache block are both implementation-specific"
+    trigger_keyword: "implementation-specific"
+    source_section: "Unprivileged Spec, CMO §cmo"
+    confidence: "high"
+  - name: "cache_capacity_and_organization"
+    description: "The capacity and organization of a cache, which varies across implementations."
+    type: "structural"
+    constraints: null
+    evidence: "The capacity and organization of a cache and the size of a cache block are both implementation-specific"
+    trigger_keyword: "implementation-specific"
+    source_section: "Unprivileged Spec, CMO §cmo"
+    confidence: "high"
+notes: "This is the canonical positive example from the challenge. Two parameters: cache block size and cache capacity/organization."

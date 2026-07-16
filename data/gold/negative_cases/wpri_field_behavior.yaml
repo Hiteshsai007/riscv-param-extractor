@@ -1,0 +1,16 @@
+# Gold label for: wpri_field_behavior.txt
+# Classification: NEGATIVE — mandatory behavior, not implementation variability
+
+snippet_file: data/raw_snippets/wpri_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+expected_parameters: []
+notes: >
+  This is a tricky negative case. WPRI LOOKS like a parameter (it's one of the
+  three field behavior classes), but unlike WARL and WLRL, WPRI fields have
+  NO implementation variability:
+  - "should" here is directed at SOFTWARE ("Software should ignore...")
+  - The hardware behavior is MANDATORY: "implementations that do not furnish
+    these fields must make them read-only zero"
+  - There is no axis on which implementations differ — all must make these
+    fields read-only zero.
+  The pipeline should NOT extract this as a parameter.

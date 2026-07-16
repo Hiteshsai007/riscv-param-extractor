@@ -1,0 +1,22 @@
+# Llama 3.1 model-specific configuration
+# Used as comparison/baseline model for cross-model divergence analysis
+
+model:
+  name: "llama3.1:8b-instruct-q4_K_M"
+  provider: "ollama"
+  base_url: "http://localhost:11434"
+  api_key: null
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+
+# Notes:
+# - Widely used reference model — easy to justify to mentors
+# - 8B variant fits on most consumer GPUs
+# - Use q4_K_M quantization for memory efficiency
+# - 70B variant available if compute allows (requires ~40GB VRAM at q4)

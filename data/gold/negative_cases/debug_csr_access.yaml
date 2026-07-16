@@ -1,0 +1,11 @@
+# Gold label for: debug_csr_access.txt
+# Classification: NEGATIVE — mandatory behavior ("should" = normative requirement)
+
+snippet_file: data/raw_snippets/debug_csr_access.txt
+source_section: "Privileged Spec, CSR Address Mapping §priv-csrs"
+expected_parameters: []
+notes: >
+  "Should" in this context is a normative requirement (raise illegal-instruction
+  exception), not an optional feature. The spec is telling implementations what
+  they MUST do, not giving them a choice. This is mandatory behavior phrased
+  with "should" — a classic false-positive trap for keyword-based detection.

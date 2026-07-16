@@ -1,0 +1,17 @@
+# Gold label for: warl_field_behavior.txt
+# Classification: POSITIVE — defines implementation-variable CSR field behavior
+
+snippet_file: data/raw_snippets/warl_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+expected_parameters:
+  - name: "warl_supported_values"
+    description: "WARL CSR fields are only defined for a subset of bit encodings chosen by the implementation, but allow any value to be written and guarantee to return a legal value on read."
+    type: "field_behavior"
+    constraints: "Must return a legal value on read. Legal value returned must deterministically depend on the illegal written value and architectural state."
+    evidence: "Some read/write CSR fields are only defined for a subset of bit encodings, but allow any value to be written while guaranteeing to return a legal value whenever read."
+    trigger_keyword: "WARL"
+    source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+    confidence: "high"
+notes: >
+  WARL is one of the three canonical CSR field behavior classes (WPRI, WLRL, WARL).
+  The implementation defines WHICH values are legal — this is the parameter axis.

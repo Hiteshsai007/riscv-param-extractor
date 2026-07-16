@@ -1,0 +1,22 @@
+# Qwen 2.5 model-specific configuration
+# Inherits from default.yaml — only overrides model-specific values
+
+model:
+  name: "qwen2.5:7b-instruct"
+  provider: "ollama"
+  base_url: "http://localhost:11434"
+  api_key: null
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+
+# Notes:
+# - Qwen 2.5 has strong structured-output compliance
+# - Good long-context handling for full manual sections
+# - If compute-constrained, use qwen2.5:7b-instruct instead of 32b
+# - Quantization: use q4_K_M for 32b variant if VRAM limited

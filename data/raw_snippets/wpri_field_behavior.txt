@@ -1,0 +1,2 @@
+# Source: Privileged Spec, CSR Field Specifications §priv-csrs — WPRI
+Some whole read/write fields are reserved for future use. Software should ignore the values read from these fields, and should preserve the values held in these fields when writing values to other fields of the same register. For forward compatibility, implementations that do not furnish these fields must make them read-only zero. These fields are labeled WPRI in the register descriptions.
