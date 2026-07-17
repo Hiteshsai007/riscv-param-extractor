@@ -1,0 +1,18 @@
+source_file: data\raw_snippets\wlrl_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WLRL
+candidates_found: 3
+parameters_extracted: 1
+parameters:
+- name: wlrl_illegal_write_exception
+  description: Whether the implementation raises an illegal-instruction exception
+    when software writes a non-supported value to a WLRL field.
+  type: boolean
+  constraints: Permitted but not required — implementation choice.
+  evidence: Implementations are permitted but not required to raise an illegal-instruction
+    exception if an instruction attempts to write a non-supported value to a WLRL
+    field.
+  trigger_keyword: permitted but not required
+  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

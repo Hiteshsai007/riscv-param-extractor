@@ -1,0 +1,16 @@
+source_file: data\raw_snippets\non_coherent_agent_mechanism.txt
+source_section: Unprivileged Spec, CMO §cmo — Coherent Agents and Caches
+candidates_found: 2
+parameters_extracted: 1
+parameters:
+- name: non_coherent_agent_cbo_mechanism
+  description: The mechanism by which a non-coherent agent initiates a cache-block
+    operation.
+  type: enumerated
+  constraints: null
+  evidence: The mechanism to perform such an operation is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

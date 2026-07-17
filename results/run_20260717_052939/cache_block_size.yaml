@@ -1,0 +1,24 @@
+source_file: data\raw_snippets\cache_block_size.txt
+source_section: Unprivileged Spec, Cache Management Operations (CMO) §cmo
+candidates_found: 1
+parameters_extracted: 2
+parameters:
+- name: cache_block_size
+  description: The size of a cache block, which is implementation-specific.
+  type: numeric_range
+  constraints: Must be uniform throughout the system in initial CMO extensions.
+  evidence: the size of a cache block are both implementation-specific
+  trigger_keyword: implementation-specific
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+- name: cache_capacity_and_organization
+  description: The capacity and organization of a cache, which varies across implementations.
+  type: enumerated
+  constraints: null
+  evidence: The capacity and organization of a cache and the size of a cache block
+    are both implementation-specific
+  trigger_keyword: implementation-specific
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

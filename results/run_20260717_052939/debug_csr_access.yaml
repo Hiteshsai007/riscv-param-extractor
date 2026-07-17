@@ -1,0 +1,17 @@
+source_file: data\raw_snippets\debug_csr_access.txt
+source_section: Privileged Spec, CSR Address Mapping §priv-csrs — Debug CSR Access
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: debug_csr_access_exception
+  description: Whether the implementation raises an illegal-instruction exception
+    on machine-mode access to certain debug CSRs.
+  type: boolean
+  constraints: Should raise an exception, but not required — implementation choice.
+  evidence: Implementations should raise illegal-instruction exceptions on machine-mode
+    access to the latter set of registers.
+  trigger_keyword: should
+  source_section: Privileged Spec, CSR Address Mapping §priv-csrs
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

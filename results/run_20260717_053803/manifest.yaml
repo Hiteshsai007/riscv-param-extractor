@@ -1,0 +1,32 @@
+run_id: '20260717_053803'
+timestamp: '2026-07-17T05:38:03.693268+00:00'
+model:
+  name: qwen2.5:7b-instruct
+  provider: ollama
+  base_url: http://localhost:11434
+  api_key: null
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+pipeline:
+  pass1_method: regex
+  max_retries: 2
+  retry_delay_seconds: 1
+  output_dir: results/
+prompt_version: v6_decision_framework
+input_files:
+- data\raw_snippets\cache_block_size.txt
+- data\raw_snippets\cbo_zero_atomicity.txt
+- data\raw_snippets\cmo_trigger_behavior.txt
+- data\raw_snippets\csr_address_encoding.txt
+- data\raw_snippets\csr_trap_intercept.txt
+- data\raw_snippets\debug_csr_access.txt
+- data\raw_snippets\non_coherent_agent_mechanism.txt
+- data\raw_snippets\warl_field_behavior.txt
+- data\raw_snippets\wlrl_field_behavior.txt
+- data\raw_snippets\wpri_field_behavior.txt
+output_dir: results\run_20260717_053803

@@ -1,0 +1,18 @@
+source_file: data\raw_snippets\cbo_zero_atomicity.txt
+source_section: Unprivileged Spec, CMO §cmo — Cache-Block Zero
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: cbo_zero_update_order_and_granularity
+  description: The order, granularity, and atomicity with which an implementation
+    updates bytes for cache-block zero.
+  type: enumerated
+  constraints: May update bytes in any order and with any granularity, including individual
+    bytes.
+  evidence: An implementation may update the bytes in any order and with any granularity
+    and atomicity, including individual bytes.
+  trigger_keyword: may
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

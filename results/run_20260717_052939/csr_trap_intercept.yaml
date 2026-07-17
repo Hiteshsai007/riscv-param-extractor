@@ -1,0 +1,20 @@
+source_file: data\raw_snippets\csr_trap_intercept.txt
+source_section: Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE
+  box)
+candidates_found: 2
+parameters_extracted: 1
+parameters:
+- name: csr_access_trap_capability
+  description: Whether the implementation allows a more-privileged level to trap otherwise
+    permitted CSR accesses by a less-privileged level.
+  type: capability
+  constraints: null
+  evidence: Implementations might allow a more-privileged level to trap otherwise
+    permitted CSR accesses by a less-privileged level to allow these accesses to be
+    intercepted.
+  trigger_keyword: might
+  source_section: Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE
+    box)
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

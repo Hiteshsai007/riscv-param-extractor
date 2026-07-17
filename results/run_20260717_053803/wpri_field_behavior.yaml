@@ -1,0 +1,32 @@
+source_file: data\raw_snippets\wpri_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WPRI
+candidates_found: 2
+parameters_extracted: 2
+parameters:
+- name: wpri_read_ignore
+  description: Software should ignore the values read from WPRI fields.
+  type: boolean
+  constraints: Software should ignore the values read from these fields.
+  evidence: Software should ignore the values read from these fields, and should preserve
+    the values held in these fields when writing values to other fields of the same
+    register.
+  trigger_keyword: should
+  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
+  confidence: high
+- name: wpri_write_preserve
+  description: Software should preserve the values held in WPRI fields when writing
+    values to other fields of the same register.
+  type: boolean
+  constraints: Software should preserve the values held in these fields.
+  evidence: Software should ignore the values read from these fields, and should preserve
+    the values held in these fields when writing values to other fields of the same
+    register.
+  trigger_keyword: should
+  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
+  confidence: high
+rejected_candidates: []
+hallucination_flags:
+- "SCHEMA_INVALID: wpri_read_only_zero — 1 validation error for Parameter\ntype\n\
+  \  Input should be 'boolean', 'enumerated', 'numeric_range', 'field_behavior' or\
+  \ 'capability' [type=enum, input_value='mandatory_behavior', input_type=str]\n \
+  \   For further information visit https://errors.pydantic.dev/2.12/v/enum"

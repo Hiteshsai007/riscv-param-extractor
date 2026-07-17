@@ -1,0 +1,17 @@
+source_file: data\raw_snippets\cbo_zero_atomicity.txt
+source_section: Unprivileged Spec, CMO §cmo — Cache-Block Zero
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: cache_block_zero_update_mechanism
+  description: The mechanism by which an implementation updates the bytes corresponding
+    to a cache block during a cache-block zero instruction.
+  type: enumerated
+  constraints: null
+  evidence: An implementation may update the bytes in any order and with any granularity
+    and atomicity, including individual bytes.
+  trigger_keyword: may
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

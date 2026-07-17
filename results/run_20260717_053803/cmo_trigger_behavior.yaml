@@ -1,0 +1,18 @@
+source_file: data\raw_snippets\cmo_trigger_behavior.txt
+source_section: Unprivileged Spec, CMO §cmo — Breakpoint Exceptions
+candidates_found: 2
+parameters_extracted: 1
+parameters:
+- name: cmo_load_store_mechanism
+  description: The mechanism by which memory accesses are considered to be loads or
+    stores for address triggers.
+  type: enumerated
+  constraints: null
+  evidence: Memory accesses may be considered to be loads or stores depending on the
+    implementation, i.e. whether an address trigger matches on these instructions
+    when mcontrol6[load]=1 or mcontrol6[store]=1 is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

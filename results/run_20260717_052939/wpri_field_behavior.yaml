@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\wpri_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WPRI
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

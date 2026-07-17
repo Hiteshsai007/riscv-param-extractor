@@ -1,0 +1,33 @@
+source_file: data\raw_snippets\warl_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WARL
+candidates_found: 4
+parameters_extracted: 2
+parameters:
+- name: warl_supported_values
+  description: The set of supported values for a WARL field.
+  type: enumerated
+  constraints: The range of supported values can be determined by attempting to write
+    a desired setting then reading to see if the value was retained.
+  evidence: Some read/write CSR fields are only defined for a subset of bit encodings,
+    but allow any value to be written while guaranteeing to return a legal value whenever
+    read. Assuming that writing the CSR has no other side effects, the range of supported
+    values can be determined by attempting to write a desired setting then reading
+    to see if the value was retained.
+  trigger_keyword: subset of bit encodings
+  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
+  confidence: high
+- name: warl_read_behavior
+  description: The behavior of a WARL field on read when the last write was of an
+    illegal value.
+  type: field_behavior
+  constraints: The legal value returned should deterministically depend on the illegal
+    written value and the architectural state of the hart.
+  evidence: Implementations can return any legal value on the read of a WARL field
+    when the last write was of an illegal value, but the legal value returned should
+    deterministically depend on the illegal written value and the architectural state
+    of the hart.
+  trigger_keyword: should deterministically depend
+  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []

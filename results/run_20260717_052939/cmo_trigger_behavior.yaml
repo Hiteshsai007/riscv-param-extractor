@@ -1,0 +1,17 @@
+source_file: data\raw_snippets\cmo_trigger_behavior.txt
+source_section: Unprivileged Spec, CMO §cmo — Breakpoint Exceptions
+candidates_found: 2
+parameters_extracted: 1
+parameters:
+- name: memory_access_type_implementation_specific
+  description: The type of memory access (load or store) is implementation-specific.
+  type: enumerated
+  constraints: null
+  evidence: Memory accesses may be considered to be loads or stores depending on the
+    implementation, i.e. whether an address trigger matches on these instructions
+    when mcontrol6[load]=1 or mcontrol6[store]=1 is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Unprivileged Spec, CMO §cmo
+  confidence: high
+rejected_candidates: []
+hallucination_flags: []
