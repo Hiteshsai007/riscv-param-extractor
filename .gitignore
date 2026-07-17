@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .env
+results/*
+!results/run_20260717_052939/
+!results/run_20260717_053803/
