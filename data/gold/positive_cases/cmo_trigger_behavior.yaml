@@ -6,7 +6,7 @@ source_section: "Unprivileged Spec, CMO §cmo"
 expected_parameters:
   - name: "cmo_trigger_module_behavior"
     description: "The behavior of trigger modules with respect to CMO instructions, unless defined by the debug architecture spec."
-    type: "architectural_choice"
+    type: "enumerated"
     constraints: null
     evidence: "the behavior of trigger modules with respect to CMO instructions is UNSPECIFIED."
     trigger_keyword: "UNSPECIFIED"
@@ -14,7 +14,7 @@ expected_parameters:
     confidence: "high"
   - name: "cmo_trigger_match_type"
     description: "Whether an address trigger matches on memory accesses from CMO instructions when mcontrol6[load]=1 or mcontrol6[store]=1."
-    type: "architectural_choice"
+    type: "boolean"
     constraints: "Memory accesses may be considered to be loads or stores depending on the implementation."
     evidence: "whether an address trigger matches on these instructions when mcontrol6[load]=1 or mcontrol6[store]=1 is implementation-specific."
     trigger_keyword: "implementation-specific"

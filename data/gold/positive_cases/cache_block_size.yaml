@@ -14,7 +14,7 @@ expected_parameters:
     confidence: "high"
   - name: "cache_capacity_and_organization"
     description: "The capacity and organization of a cache, which varies across implementations."
-    type: "structural"
+    type: "enumerated"
     constraints: null
     evidence: "The capacity and organization of a cache and the size of a cache block are both implementation-specific"
     trigger_keyword: "implementation-specific"

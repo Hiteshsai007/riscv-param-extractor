@@ -157,7 +157,7 @@ def run_extraction(args: argparse.Namespace) -> None:
 
         all_results.append(result)
         logger.info(
-            "  → %d candidates, %d parameters extracted, %d hallucination flags",
+            "  -> %d candidates, %d parameters extracted, %d hallucination flags",
             result.candidates_found,
             result.parameters_extracted,
             len(result.hallucination_flags),

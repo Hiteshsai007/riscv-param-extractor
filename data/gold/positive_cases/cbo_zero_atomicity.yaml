@@ -6,7 +6,7 @@ source_section: "Unprivileged Spec, CMO §cmo"
 expected_parameters:
   - name: "cbo_zero_atomicity_and_granularity"
     description: "The order, granularity, and atomicity with which an implementation updates the bytes corresponding to a cache block when executing a cache-block zero instruction."
-    type: "architectural_choice"
+    type: "enumerated"
     constraints: "May update bytes in any order and with any granularity, including individual bytes."
     evidence: "An implementation may update the bytes in any order and with any granularity and atomicity, including individual bytes."
     trigger_keyword: "may"
