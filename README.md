@@ -1,9 +1,14 @@
 # RISC-V Architectural Parameter Extractor
 
-**LFX Mentorship Coding Challenge — Part II**
-**Author:** Hitesh
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Inference: Ollama](https://img.shields.io/badge/Inference-Ollama-orange.svg)](https://ollama.com/)
+[![Validation: Pydantic](https://img.shields.io/badge/Validation-Pydantic-red.svg)](https://docs.pydantic.dev/)
 
-AI-assisted extraction of architectural parameters from RISC-V ISA specifications using a two-pass LLM pipeline with mechanical hallucination detection.
+This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-assisted Architectural Parameter Extraction coding challenge. The objective is to extract implementation-defined architectural parameters from RISC-V ISA specification snippets using prompt-engineered large language models while ensuring deterministic validation, reproducibility, and structured YAML output.
+
+**LFX Mentorship Coding Challenge — Part II**  
+**Author:** Hitesh
 
 ## Coding Challenge Deliverables
 
@@ -15,10 +20,10 @@ AI-assisted extraction of architectural parameters from RISC-V ISA specification
 - **Seed:** 42
 - **Runtime:** Locally executed via Ollama engine. Run metrics (execution time) are logged automatically to console and `summary.yaml`.
 
-### Deliverable 2 — Prompt Engineering
-- **Prompt Evolution:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and finally a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`).
+### Deliverable 2 — Prompt Engineering Journey
+- **Prompt Engineering Journey:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and finally a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`).
 - **Prompt Refinement:** Iterations were driven by failure analysis on the gold dataset, resolving issues like type confusion (`boolean` vs `enumerated`) and multi-parameter extraction halting.
-- **Hallucination Mitigation Strategy:** A strict, mechanical anti-hallucination gate is implemented in Python (`validate_yaml.py`). The LLM must output an `evidence` field, which is checked to ensure it is a verbatim, character-for-character substring of the source text. If not, it is flagged as a hallucination.
+- **Hallucination Mitigation Strategy:** A strict, deterministic hallucination validation gate is implemented in Python (`validate_yaml.py`). The LLM must output an `evidence` field, which is checked to ensure it is a verbatim, character-for-character substring of the source text. If not, it is flagged as a hallucination.
 - **Lessons Learned:** Instruction-tuned 7B models strictly require 1-shot formatting templates for Pydantic schema compliance. Explicit contrastive examples are essential for boundary detection. The complete iteration log is in `EXPERIMENTS.md`.
 
 ### Deliverable 3 — Results
@@ -144,9 +149,9 @@ Input Snippet → [Pass 1: Regex Candidate Detection] → Candidate Sentences
 - **Pass 1 (Deterministic):** Regex-based trigger keyword matching identifies candidate sentences. No LLM call — fully reproducible, free to run.
 - **Pass 2 (LLM):** Each candidate is classified as `parameter | software_permission | mandatory_behavior | structural_convention | architectural_constant`. Only genuine parameters are extracted as structured YAML.
 
-### Anti-Hallucination Gates
+### Deterministic Hallucination Validation
 
-1. **Verbatim evidence check:** Every parameter's `evidence` field must be an exact substring of the source text. Mechanical — no LLM judgment needed.
+1. **Verbatim evidence check:** Every parameter's `evidence` field must be an exact substring of the source text. Deterministic — no LLM judgment needed.
 2. **Schema validation:** 100% of outputs must pass Pydantic validation.
 3. **Retry logic:** Malformed LLM output triggers retry (configurable, default 2).
 
@@ -201,7 +206,7 @@ All generation parameters are externalized in `config/default.yaml`:
 | Model | Role | Config |
 |-------|------|--------|
 | Qwen 2.5 7B Instruct | Primary | `config/models/qwen2_5.yaml` |
-| Llama 3.1 8B Instruct | Comparison | `config/models/llama3_1.yaml` |
+| Llama 3.1 8B Instruct | Alternative Evaluation Model | `config/models/llama3_1.yaml` |
 
 **Inference framework:** Ollama (local). Install from [ollama.ai](https://ollama.ai).
 
@@ -213,13 +218,16 @@ ollama pull llama3.1:8b-instruct-q4_K_M
 
 ## Evaluation Metrics
 
-| Metric | Target | Method |
-|--------|--------|--------|
-| Precision | ≥ 0.85 | Extracted ∩ gold / extracted |
-| Recall | ≥ 0.80 | Extracted ∩ gold / gold |
-| Hallucination rate | ≤ 5% | % evidence fields failing substring check |
-| YAML validity | 100% | % outputs passing Pydantic on first attempt |
-| Reproducibility | ≥ 95% | 3× repeated runs, field-level diff |
+The following metrics represent the actual measured performance from the best-performing iteration (**v6_decision_framework**, Run 5):
+
+| Metric | Measured Result | Notes |
+|:---|:---|:---|
+| **Precision** | 0.3846 (5/13) | Measured as the ratio of correct parameters (TP) to all extracted parameters (TP + FP) using exact matching. |
+| **Recall** | 0.5000 (5/10) | Measured as the ratio of correct parameters (TP) to all parameters in the gold dataset (TP + FN) using exact matching. |
+| **F1 Score** | 0.4348 | The harmonic mean of Precision and Recall. |
+| **YAML Validity** | 100% (13/13) | Confirmed via mechanical validation of all generated files against the Pydantic schema prior to disk write. |
+| **Hallucination Rate** | 0.0000 (0/13) | Percentage of extracted parameters whose `evidence` field failed the verbatim substring matching check. |
+| **Execution Method** | Local Inference | Executed deterministically using Ollama (`qwen2.5:7b-instruct`) with `temperature: 0.0` and `seed: 42`. |
 
 **Evaluation Limitations:**
 - Precision and Recall currently use deterministic exact matching against gold labels (`name::type`).
