@@ -11,8 +11,21 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 **LFX Mentorship Coding Challenge — Part II**  
 **Author:** Hitesh
 
+## Challenge Deliverable Map
+
+| Challenge Requirement | Repository Location |
+|-----------------------|---------------------|
+| **1. LLM Details** | [README → Deliverable 1](#deliverable-1) |
+| **2. Prompt Files** | [prompts/](prompts/) |
+| **3. Prompt Engineering Journey** | [EXPERIMENTS.md](EXPERIMENTS.md) |
+| **4. Hallucination Mitigation** | [README → Deliverable 2](#deliverable-2) + [EXPERIMENTS.md](EXPERIMENTS.md) |
+| **5. Example YAML Outputs** | [results/](results/) / [README → Example YAML Output](#example-yaml-output) |
+| **6. Source Code** | [src/](src/) |
+
 ## Coding Challenge Deliverables
 
+
+<a id="deliverable-1"></a>
 ### Deliverable 1 — LLM Details
 - **Model Name:** Qwen 2.5 7B Instruct
 - **Model Version:** `qwen2.5:7b-instruct`
@@ -21,6 +34,7 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 - **Seed:** 42
 - **Runtime:** Locally executed via Ollama engine. Run metrics (execution time) are logged automatically to console and `summary.yaml`.
 
+<a id="deliverable-2"></a>
 ### Deliverable 2 — Prompt Engineering Journey
 - **Prompt Engineering Journey:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and finally a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`).
 - **Prompt Refinement:** Iterations were driven by failure analysis on the gold dataset, resolving issues like type confusion (`boolean` vs `enumerated`) and multi-parameter extraction halting.
@@ -32,6 +46,7 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 - **Required Fields:** `name`, `description`, `type`, `constraints`, `evidence`, `trigger_keyword`, `source_section`, `confidence`.
 - **Evaluation Metrics:** Evaluated for Precision, Recall, F1, Hallucination Rate, and YAML Validity.
 
+<a id="example-yaml-output"></a>
 # Example YAML Output
 
 ### Example 1 — Cache Block Specification
