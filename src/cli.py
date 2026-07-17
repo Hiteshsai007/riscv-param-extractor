@@ -19,6 +19,7 @@ import argparse
 import json
 import logging
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -91,6 +92,7 @@ def _extract_section_from_file(snippet_path: Path) -> str:
 
 def run_extraction(args: argparse.Namespace) -> None:
     """Run the extraction pipeline on input files."""
+    start_time = time.time()
     config = load_config(args.config)
     _setup_logging(config)
     logger = logging.getLogger(__name__)
@@ -194,6 +196,7 @@ def run_extraction(args: argparse.Namespace) -> None:
         len(all_results),
         sum(r.parameters_extracted for r in all_results),
     )
+    logger.info("Execution time: %.2fs", time.time() - start_time)
 
 
 def run_health_check(args: argparse.Namespace) -> None:

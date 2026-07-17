@@ -5,6 +5,35 @@
 
 AI-assisted extraction of architectural parameters from RISC-V ISA specifications using a two-pass LLM pipeline with mechanical hallucination detection.
 
+## Coding Challenge Deliverables
+
+### Deliverable 1 — LLM Details
+- **Model Name:** Qwen 2.5 7B Instruct
+- **Model Version:** `qwen2.5:7b-instruct`
+- **Context Length:** 8,192 tokens
+- **Temperature:** 0.0 (Deterministic extraction)
+- **Seed:** 42
+- **Runtime:** Locally executed via Ollama engine. Run metrics (execution time) are logged automatically to console and `summary.yaml`.
+
+### Deliverable 2 — Prompt Engineering
+- **Prompt Evolution:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and finally a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`).
+- **Prompt Refinement:** Iterations were driven by failure analysis on the gold dataset, resolving issues like type confusion (`boolean` vs `enumerated`) and multi-parameter extraction halting.
+- **Hallucination Mitigation Strategy:** A strict, mechanical anti-hallucination gate is implemented in Python (`validate_yaml.py`). The LLM must output an `evidence` field, which is checked to ensure it is a verbatim, character-for-character substring of the source text. If not, it is flagged as a hallucination.
+- **Lessons Learned:** Instruction-tuned 7B models strictly require 1-shot formatting templates for Pydantic schema compliance. Explicit contrastive examples are essential for boundary detection. The complete iteration log is in `EXPERIMENTS.md`.
+
+### Deliverable 3 — Results
+- **YAML Output Format:** Validated by a strict Pydantic schema (`schema/parameter_schema.py`).
+- **Required Fields:** `name`, `description`, `type`, `constraints`, `evidence`, `trigger_keyword`, `source_section`, `confidence`.
+- **Evaluation Metrics:** Evaluated for Precision, Recall, F1, Hallucination Rate, and YAML Validity.
+- **Example Output:**
+```yaml
+- name: "cache_block_size"
+  description: "The size of a cache block, which is implementation-specific."
+  type: "numeric_range"
+  constraints: "Must be uniform throughout the system in initial CMO extensions."
+  evidence: "the size of a cache block are both implementation-specific"
+```
+
 ## Quick Start
 
 ```bash
@@ -56,7 +85,6 @@ Input Snippet → [Pass 1: Regex Candidate Detection] → Candidate Sentences
 ```
 riscv-param-extractor/
 ├── README.md
-├── PRD.md
 ├── EXPERIMENTS.md              # Prompt iteration log with metrics
 ├── requirements.txt
 ├── config/
@@ -122,6 +150,12 @@ ollama pull llama3.1:8b-instruct-q4_K_M
 | Hallucination rate | ≤ 5% | % evidence fields failing substring check |
 | YAML validity | 100% | % outputs passing Pydantic on first attempt |
 | Reproducibility | ≥ 95% | 3× repeated runs, field-level diff |
+
+**Evaluation Limitations:**
+- Precision and Recall currently use deterministic exact matching against gold labels (`name::type`).
+- Semantically equivalent parameter names (e.g., `cache_block_operation_mechanism` vs. `non_coherent_agent_cbo_mechanism`) are counted as mismatches (causing 1 FP and 1 FN).
+- Therefore, the reported metrics are highly conservative.
+- This design was intentionally chosen to guarantee reproducibility and deterministic evaluation without relying on a subjective LLM judge.
 
 ## Reproducing Results
 
