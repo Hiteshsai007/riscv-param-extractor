@@ -1,9 +1,14 @@
 # RISC-V Architectural Parameter Extractor
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Inference: Ollama](https://img.shields.io/badge/Inference-Ollama-orange.svg)](https://ollama.com/)
-[![Validation: Pydantic](https://img.shields.io/badge/Validation-Pydantic-red.svg)](https://docs.pydantic.dev/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org)
+
+[![Apache License](https://img.shields.io/badge/License-Apache%202.0-D22128.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
+[![Ollama](https://img.shields.io/badge/Ollama-Local%20Inference-000000?logo=ollama&logoColor=white)](https://ollama.com)
+
+[![Pydantic](https://img.shields.io/badge/Pydantic-Schema%20Validation-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
+
+[![Linux Foundation](https://img.shields.io/badge/LFX-Coding%20Challenge-003778)](https://lfx.linuxfoundation.org/)
 
 This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-assisted Architectural Parameter Extraction coding challenge. The objective is to extract implementation-defined architectural parameters from RISC-V ISA specification snippets using prompt-engineered large language models while ensuring deterministic validation, reproducibility, and structured YAML output.
 
@@ -208,7 +213,7 @@ All generation parameters are externalized in `config/default.yaml`:
 | Qwen 2.5 7B Instruct | Primary | `config/models/qwen2_5.yaml` |
 | Llama 3.1 8B Instruct | Alternative Evaluation Model | `config/models/llama3_1.yaml` |
 
-**Inference framework:** Ollama (local). Install from [ollama.ai](https://ollama.ai).
+**Inference framework:** Ollama (local). Install from [https://ollama.com](https://ollama.com).
 
 ```bash
 # Pull models
