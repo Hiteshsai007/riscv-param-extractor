@@ -1,13 +1,9 @@
 # RISC-V Architectural Parameter Extractor
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org)
-
 [![Apache License](https://img.shields.io/badge/License-Apache%202.0-D22128.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20Inference-000000?logo=ollama&logoColor=white)](https://ollama.com)
-
 [![Pydantic](https://img.shields.io/badge/Pydantic-Schema%20Validation-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
-
 [![Linux Foundation](https://img.shields.io/badge/LFX-Coding%20Challenge-003778)](https://lfx.linuxfoundation.org/)
 
 This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-assisted Architectural Parameter Extraction coding challenge. The objective is to extract implementation-defined architectural parameters from RISC-V ISA specification snippets using prompt-engineered large language models while ensuring deterministic validation, reproducibility, and structured YAML output.
