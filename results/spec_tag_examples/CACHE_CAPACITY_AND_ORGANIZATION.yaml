@@ -1,0 +1,14 @@
+---
+
+$schema: param_schema.json#
+kind: parameter
+name: CACHE_CAPACITY_AND_ORGANIZATION
+description: 'The capacity and organization of a cache, which varies across implementations.
+
+  '
+long_name: Cache Capacity And Organization
+schema:
+  type: string
+definedBy:
+  extension:
+    name: TODO_EXTENSION_NAME

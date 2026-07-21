@@ -1,0 +1,14 @@
+---
+
+$schema: param_schema.json#
+kind: parameter
+name: CACHE_BLOCK_SIZE
+description: 'The size of a cache block, which is implementation-specific.
+
+  '
+long_name: Cache Block Size
+schema:
+  type: integer
+definedBy:
+  extension:
+    name: TODO_EXTENSION_NAME

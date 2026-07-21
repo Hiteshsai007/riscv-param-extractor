@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/spec/std/isa/param/WLRL_SUPPORTED_VALUES.yaml
+@@ -0,0 +1,15 @@
++---
++
++# yaml-language-server: $schema=../../../schemas/param_schema.json
++
++$schema: param_schema.json#
++kind: parameter
++name: WLRL_SUPPORTED_VALUES
++description: |
++  WLRL CSR fields specify behavior for only a subset of possible bit encodings, with the implementation defining which values are legal.
++long_name: Wlrl Supported Values
++schema:
++  type: string
++definedBy:
++  extension:
++    name: TODO_EXTENSION_NAME

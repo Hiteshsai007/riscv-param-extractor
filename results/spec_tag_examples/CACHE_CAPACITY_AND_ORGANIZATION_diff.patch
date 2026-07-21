@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/spec/std/isa/param/CACHE_CAPACITY_AND_ORGANIZATION.yaml
+@@ -0,0 +1,15 @@
++---
++
++# yaml-language-server: $schema=../../../schemas/param_schema.json
++
++$schema: param_schema.json#
++kind: parameter
++name: CACHE_CAPACITY_AND_ORGANIZATION
++description: |
++  The capacity and organization of a cache, which varies across implementations.
++long_name: Cache Capacity And Organization
++schema:
++  type: string
++definedBy:
++  extension:
++    name: TODO_EXTENSION_NAME
