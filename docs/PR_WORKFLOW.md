@@ -8,8 +8,10 @@ The script `scripts/generate_spec_tags.py` takes a validated extraction YAML fil
 
 **Command:**
 ```bash
-python scripts/generate_spec_tags.py results/run_YOUR_RUN/your_snippet.yaml --outdir results/spec_tag_examples
+python scripts/generate_spec_tags.py results/run_20260717_052939/cache_block_size.yaml --outdir results/spec_tag_examples
 ```
+
+*See the `results/spec_tag_examples/` directory for real generated output.*
 
 **What it does:**
 - Maps the parameter `name` to uppercase UDB naming convention.

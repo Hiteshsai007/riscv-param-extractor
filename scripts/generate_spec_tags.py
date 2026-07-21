@@ -23,6 +23,10 @@ def generate_udb_param(extracted_param: dict) -> dict:
         schema_type = "integer"
     elif p_type in ("boolean", "capability"):
         schema_type = "boolean"
+    elif p_type == "enumerated":
+        schema_type = "string"  # TODO: map to enum list if values extractable
+    else:
+        schema_type = "string"  # TODO: verify type for custom pipeline types like field_behavior
         
     description = extracted_param.get("description", "")
     if description and not description.endswith("\n"):
@@ -42,7 +46,13 @@ def generate_udb_param(extracted_param: dict) -> dict:
     }
     
     if schema_type == "integer":
-        udb_dict["schema"]["minimum"] = 1 # Reasonable default for sizes
+        # Only add minimum/multipleOf if constraints imply it
+        constraints = extracted_param.get("constraints") or ""
+        if "power-of-two" in constraints.lower():
+            udb_dict["schema"]["minimum"] = 1
+            udb_dict["schema"]["multipleOf"] = 2
+        elif "minimum" in constraints.lower():
+            udb_dict["schema"]["minimum"] = 1
 
     # Placeholder for definedBy since it requires manual mapping
     udb_dict["definedBy"] = {
@@ -102,7 +112,13 @@ def main():
 +  {udb_format['description'].strip()}
 +long_name: {udb_format['long_name']}
 +schema:
-+  type: {udb_format['schema']['type']}
++  type: {udb_format['schema']['type']}"""
+        if 'minimum' in udb_format['schema']:
+            patch_content += f"\n+  minimum: {udb_format['schema']['minimum']}"
+        if 'multipleOf' in udb_format['schema']:
+            patch_content += f"\n+  multipleOf: {udb_format['schema']['multipleOf']}"
+            
+        patch_content += f"""
 +definedBy:
 +  extension:
 +    name: TODO_EXTENSION_NAME

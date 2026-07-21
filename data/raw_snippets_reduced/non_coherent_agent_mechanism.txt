@@ -1,0 +1,2 @@
+# Source: Unprivileged Spec, CMO §cmo — Coherent Agents and Caches
+A non-coherent agent may initiate a cache-block operation that operates on the set of coherent caches accessed by a set of coherent agents. The mechanism to perform such an operation is implementation-specific.

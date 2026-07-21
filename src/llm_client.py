@@ -123,7 +123,8 @@ class LLMClient:
         )
 
         start_time = time.time()
-        response = requests.post(url, json=payload, timeout=300)
+        # Increased timeout for Llama 3 local runs
+        response = requests.post(url, json=payload, timeout=1200)
         elapsed_ms = (time.time() - start_time) * 1000
 
         response.raise_for_status()

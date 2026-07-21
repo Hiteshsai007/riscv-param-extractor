@@ -172,13 +172,29 @@ As part of the hardening phase, we ran a cross-model evaluation to observe extra
 
 ### Metrics Comparison (Relaxed Match)
 
+*Note: The following comparison was attempted on a reduced subset (n=4 snippets). Llama 3.1 8B failed to complete even at this reduced scope due to severe local Ollama API timeouts (1200s limit exceeded) and 500 Internal Server Errors on the host machine.*
+
 | Metric | Qwen 2.5 7B | Llama 3.1 8B |
 |--------|-------------|--------------|
-| **Precision** | 0.5000 | TBD |
-| **Recall** | 0.6000 | TBD |
-| **F1 Score** | 0.5455 | TBD |
-| **Hallucination Rate** | 0.0% | TBD |
+| **Precision** | 0.5000 | N/A (Failed) |
+| **Recall** | 0.6000 | N/A (Failed) |
+| **F1 Score** | 0.5455 | N/A (Failed) |
+| **Hallucination Rate** | 0.0% | N/A (Failed) |
 
 ### Disagreement Analysis
 
-*Detailed disagreement cases will be recorded here based on the `generate_disagreement_report` output.*
+Because the `Llama 3.1 8B` run encountered terminal API execution errors (Ollama 500 Server Errors/Timeouts), a complete quantitative disagreement report could not be generated. 
+
+However, prior to the timeout, partial parsing logs from the reduced set revealed two concrete classes of disagreement:
+
+1. **Hallucinated Evidence vs. Verbatim Match**
+   - **Parameter**: Cache Block Size (`cache_block_size.txt`)
+   - **Qwen 2.5 7B**: Correctly extracted `cache_block_size_implementation_specific` with the verbatim evidence `"the size of a cache block are both implementation-specific"`.
+   - **Llama 3.1 8B**: Extracted a generic `cache_capacity` parameter but completely fabricated the `evidence` field, failing the pipeline's exact substring check (flagged as `Hallucination detected`).
+   - **Ground Truth / UDB**: Qwen was correct. UDB expects `CACHE_BLOCK_SIZE`, and evidence must be grounded.
+
+2. **YAML Formatting vs. Markdown Wrappers**
+   - **Parameter**: CMO Trigger Behavior (`cmo_trigger_behavior.txt`)
+   - **Qwen 2.5 7B**: Output strictly compliant YAML array containing the `cmo_load_store_mechanism` parameter.
+   - **Llama 3.1 8B**: Failed validation by outputting explanatory conversational text and markdown (`Q1: WHO has the choice? The hardware...`) outside the `<thought_process>` tags, violating the schema structure and crashing the PyYAML parser.
+   - **Ground Truth**: Qwen was correct. The pipeline strictly requires raw YAML for automated CI/CD parsing.

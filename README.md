@@ -228,10 +228,12 @@ To ensure the pipeline is robust to different base models, we evaluate using bot
 
 | Metric (Relaxed) | Qwen 2.5 7B | Llama 3.1 8B |
 |------------------|-------------|--------------|
-| Precision        | 0.5000      | TBD          |
-| Recall           | 0.6000      | TBD          |
-| F1               | 0.5455      | TBD          |
-| Hallucination    | 0.0%        | TBD          |
+| Precision        | 0.5000      | N/A (Failed) |
+| Recall           | 0.6000      | N/A (Failed) |
+| F1               | 0.5455      | N/A (Failed) |
+| Hallucination    | 0.0%        | N/A (Failed) |
+
+*Note: The Llama 3.1 8B evaluation (n=4 reduced snippet set) consistently failed due to local Ollama API timeouts (300s/1200s) and 500 Internal Server Errors, demonstrating hardware/infrastructure limitations when running cross-model comparisons locally. Scaffolding is complete, but data remains unavailable until run on a larger instance.*
 
 ## UDB Grounding
 

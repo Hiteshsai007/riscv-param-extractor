@@ -56,5 +56,12 @@ def test_generate_spec_tags(tmp_path):
         
     assert data["name"] == "TEST_PARAM"
     assert data["schema"]["type"] == "integer"
-    assert data["schema"]["minimum"] == 1
     assert "A test parameter" in data["description"]
+    
+    # Check that boolean type mapped properly
+    with open(yaml2, "r", encoding="utf-8") as f:
+        content2 = f.read().strip()
+        if content2.startswith("---"):
+            content2 = content2[3:].strip()
+        data2 = yaml.safe_load(content2)
+    assert data2["schema"]["type"] == "boolean"
