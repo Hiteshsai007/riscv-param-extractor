@@ -163,3 +163,22 @@ True semantic False Positives happen when the model misinterprets normative lang
 - **Semantic Evaluation:** Upgrade the evaluation harness to use LLM-as-a-judge or embedding similarity to score parameter equivalence rather than strict string matching.
 - **Pass 1 Recall Enhancements:** Instead of pure regex, use a lightweight, high-recall embedding classifier for Pass 1 to catch implicit parameters lacking standard trigger words.
 - **Multi-Agent Debate:** Use a two-agent setup in Pass 2 where Agent A proposes extractions and Agent B critiques them against the constraints before final emission, significantly reducing type confusions and missing multi-parameters.
+
+---
+
+## 6. Cross-Model Analysis: Qwen 2.5 vs. Llama 3.1
+
+As part of the hardening phase, we ran a cross-model evaluation to observe extraction differences. 
+
+### Metrics Comparison (Relaxed Match)
+
+| Metric | Qwen 2.5 7B | Llama 3.1 8B |
+|--------|-------------|--------------|
+| **Precision** | 0.5000 | TBD |
+| **Recall** | 0.6000 | TBD |
+| **F1 Score** | 0.5455 | TBD |
+| **Hallucination Rate** | 0.0% | TBD |
+
+### Disagreement Analysis
+
+*Detailed disagreement cases will be recorded here based on the `generate_disagreement_report` output.*

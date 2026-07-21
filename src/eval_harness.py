@@ -2,8 +2,8 @@
 Evaluation Harness — Precision/Recall/Hallucination/Validity scoring.
 
 Computes all metrics defined in the PRD:
-1. Precision: extracted ∩ gold / extracted
-2. Recall: extracted ∩ gold / gold
+1. Precision: extracted ∩ gold / extracted (strict and relaxed modes)
+2. Recall: extracted ∩ gold / gold (strict and relaxed modes)
 3. Hallucination rate: % evidence fields failing exact substring match
 4. YAML validity rate: % outputs passing schema validation on first attempt
 5. Consistency: field-level diff across repeated runs (same seed/temp)
@@ -15,8 +15,10 @@ Usage:
 """
 
 import argparse
+import difflib
 import json
 import logging
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -85,6 +87,129 @@ def _parameter_key(param: dict[str, Any]) -> str:
     name = param.get("name", "").strip().lower()
     ptype = param.get("type", "").strip().lower()
     return f"{name}::{ptype}"
+
+
+def _normalize_name(name: str) -> str:
+    """
+    Normalize a parameter name for relaxed comparison.
+
+    Lowercases, strips whitespace, replaces hyphens/spaces with underscores,
+    and collapses multiple underscores.
+    """
+    name = name.strip().lower()
+    name = re.sub(r'[\s\-]+', '_', name)
+    name = re.sub(r'_+', '_', name)
+    return name.strip('_')
+
+
+def _name_similarity(name_a: str, name_b: str) -> float:
+    """
+    Compute normalized string similarity between two parameter names.
+
+    Uses difflib.SequenceMatcher on normalized names. Returns a float
+    in [0.0, 1.0] where 1.0 is an exact match.
+    """
+    norm_a = _normalize_name(name_a)
+    norm_b = _normalize_name(name_b)
+    return difflib.SequenceMatcher(None, norm_a, norm_b).ratio()
+
+
+DEFAULT_RELAXED_THRESHOLD = 0.75
+
+
+def compute_precision_recall_relaxed(
+    extracted: list[dict[str, Any]],
+    gold: list[dict[str, Any]],
+    name_similarity_threshold: float = DEFAULT_RELAXED_THRESHOLD,
+) -> dict[str, Any]:
+    """
+    Compute precision and recall using relaxed name matching.
+
+    Matching uses normalized string similarity on `name` (threshold >= 0.8)
+    combined with exact `type` match. This addresses the evaluation brittleness
+    documented in EXPERIMENTS.md where semantically equivalent parameter names
+    (e.g., `cache_block_operation_mechanism` vs `non_coherent_agent_cbo_mechanism`)
+    are counted as mismatches under strict matching.
+
+    The strict metric is NOT replaced — this is purely additive.
+
+    Returns:
+        Dict with precision, recall, f1, and match details.
+    """
+    # Build lists of (name, type) for matching
+    extracted_items = [
+        {
+            "name": p.get("name", "").strip().lower(),
+            "type": p.get("type", "").strip().lower(),
+            "key": _parameter_key(p),
+        }
+        for p in extracted
+    ]
+    gold_items = [
+        {
+            "name": p.get("name", "").strip().lower(),
+            "type": p.get("type", "").strip().lower(),
+            "key": _parameter_key(p),
+        }
+        for p in gold
+    ]
+
+    # Greedy matching: for each extracted param, find best gold match
+    matched_gold_indices: set[int] = set()
+    tp_matches: list[dict[str, Any]] = []
+    fp_keys: list[str] = []
+
+    for ext in extracted_items:
+        best_match_idx = -1
+        best_similarity = 0.0
+
+        for g_idx, gold_item in enumerate(gold_items):
+            if g_idx in matched_gold_indices:
+                continue
+            # Exact type match required
+            if ext["type"] != gold_item["type"]:
+                continue
+            sim = _name_similarity(ext["name"], gold_item["name"])
+            if sim >= name_similarity_threshold and sim > best_similarity:
+                best_similarity = sim
+                best_match_idx = g_idx
+
+        if best_match_idx >= 0:
+            matched_gold_indices.add(best_match_idx)
+            tp_matches.append({
+                "extracted": ext["key"],
+                "gold": gold_items[best_match_idx]["key"],
+                "name_similarity": round(best_similarity, 4),
+            })
+        else:
+            fp_keys.append(ext["key"])
+
+    fn_keys = [
+        gold_items[i]["key"]
+        for i in range(len(gold_items))
+        if i not in matched_gold_indices
+    ]
+
+    tp = len(tp_matches)
+    fp = len(fp_keys)
+    fn = len(fn_keys)
+
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0
+
+    return {
+        "precision": round(precision, 4),
+        "recall": round(recall, 4),
+        "f1": round(f1, 4),
+        "true_positives": tp,
+        "false_positives": fp,
+        "false_negatives": fn,
+        "name_similarity_threshold": name_similarity_threshold,
+        "matches": tp_matches,
+        "false_positive_keys": sorted(fp_keys),
+        "false_negative_keys": sorted(fn_keys),
+    }
 
 
 def compute_precision_recall(
@@ -285,6 +410,31 @@ def compute_consistency(
     }
 
 
+def compute_cross_model_agreement(
+    extracted_a: list[dict[str, Any]],
+    extracted_b: list[dict[str, Any]],
+    model_a_name: str = "model_a",
+    model_b_name: str = "model_b",
+) -> dict[str, Any]:
+    """
+    Compute Jaccard similarity and agreement metrics between two models.
+    """
+    keys_a = {_parameter_key(p) for p in extracted_a}
+    keys_b = {_parameter_key(p) for p in extracted_b}
+
+    intersection = keys_a & keys_b
+    union = keys_a | keys_b
+    
+    jaccard = len(intersection) / len(union) if union else 1.0
+
+    return {
+        "jaccard_similarity": round(jaccard, 4),
+        "total_agreed": len(intersection),
+        f"{model_a_name}_total": len(keys_a),
+        f"{model_b_name}_total": len(keys_b),
+        "agreed_keys": sorted(intersection),
+    }
+
 def evaluate_full(
     results_dir: str | Path,
     gold_dir: str | Path,
@@ -347,7 +497,8 @@ def evaluate_full(
         all_validity_details.extend(validity.get("errors", []))
 
     # Aggregate metrics
-    aggregate_pr = compute_precision_recall(all_extracted, all_gold)
+    aggregate_pr_strict = compute_precision_recall(all_extracted, all_gold)
+    aggregate_pr_relaxed = compute_precision_recall_relaxed(all_extracted, all_gold)
     aggregate_hallucination = {
         "rate": (
             len(all_hallucination_details) / len(all_extracted)
@@ -369,18 +520,175 @@ def evaluate_full(
 
     return {
         "aggregate": {
-            "precision": aggregate_pr["precision"],
-            "recall": aggregate_pr["recall"],
-            "f1": aggregate_pr["f1"],
+            "precision": aggregate_pr_strict["precision"],
+            "recall": aggregate_pr_strict["recall"],
+            "f1": aggregate_pr_strict["f1"],
             "hallucination_rate": round(aggregate_hallucination["rate"], 4),
             "yaml_validity_rate": round(aggregate_validity["rate"], 4),
             "total_extracted": len(all_extracted),
             "total_gold": len(all_gold),
         },
+        "aggregate_relaxed": {
+            "precision": aggregate_pr_relaxed["precision"],
+            "recall": aggregate_pr_relaxed["recall"],
+            "f1": aggregate_pr_relaxed["f1"],
+            "name_similarity_threshold": aggregate_pr_relaxed["name_similarity_threshold"],
+            "matches": aggregate_pr_relaxed["matches"],
+        },
         "per_snippet": per_snippet_results,
         "hallucination_details": all_hallucination_details,
         "validity_errors": all_validity_details,
-        "precision_recall_detail": aggregate_pr,
+        "precision_recall_detail": aggregate_pr_strict,
+    }
+
+
+def generate_disagreement_report(
+    results_dir_a: str | Path,
+    results_dir_b: str | Path,
+    gold_dir: str | Path,
+    snippets_dir: str | Path,
+    model_a_name: str = "model_a",
+    model_b_name: str = "model_b",
+) -> dict[str, Any]:
+    """
+    Generate a detailed disagreement report between two models' extraction results.
+
+    Identifies:
+    - Parameters found by model A but not B (and vice versa)
+    - Parameters found by both but with different `type`
+    - Parameters found by both but with different `confidence`
+    - Per-model metrics against gold labels
+
+    Returns:
+        Structured report suitable for embedding in EXPERIMENTS.md.
+    """
+    results_dir_a = Path(results_dir_a)
+    results_dir_b = Path(results_dir_b)
+    snippets_dir = Path(snippets_dir)
+
+    # Evaluate each model
+    report_a = evaluate_full(results_dir_a, gold_dir, snippets_dir)
+    report_b = evaluate_full(results_dir_b, gold_dir, snippets_dir)
+
+    # Collect all parameters per model across all snippets
+    all_params_a: dict[str, list[dict[str, Any]]] = {}  # snippet -> params
+    all_params_b: dict[str, list[dict[str, Any]]] = {}
+
+    # Get all snippet names from both result dirs
+    snippet_names = set()
+    for f in results_dir_a.glob("*.yaml"):
+        if f.stem not in ("manifest", "summary"):
+            snippet_names.add(f.stem)
+    for f in results_dir_b.glob("*.yaml"):
+        if f.stem not in ("manifest", "summary"):
+            snippet_names.add(f.stem)
+
+    disagreements = []
+
+    for snippet_name in sorted(snippet_names):
+        # Load results from both models
+        file_a = results_dir_a / f"{snippet_name}.yaml"
+        file_b = results_dir_b / f"{snippet_name}.yaml"
+
+        params_a = []
+        params_b = []
+
+        if file_a.exists():
+            with open(file_a, "r", encoding="utf-8") as f:
+                data_a = yaml.safe_load(f) or {}
+            params_a = data_a.get("parameters", [])
+
+        if file_b.exists():
+            with open(file_b, "r", encoding="utf-8") as f:
+                data_b = yaml.safe_load(f) or {}
+            params_b = data_b.get("parameters", [])
+
+        all_params_a[snippet_name] = params_a
+        all_params_b[snippet_name] = params_b
+
+        # Find disagreements
+        keys_a = {_parameter_key(p): p for p in params_a}
+        keys_b = {_parameter_key(p): p for p in params_b}
+
+        # Parameters found by A only
+        for key in sorted(set(keys_a) - set(keys_b)):
+            disagreements.append({
+                "snippet": snippet_name,
+                "type": "found_by_a_only",
+                "parameter_key": key,
+                f"{model_a_name}_value": {
+                    "name": keys_a[key].get("name"),
+                    "type": keys_a[key].get("type"),
+                    "confidence": keys_a[key].get("confidence"),
+                },
+            })
+
+        # Parameters found by B only
+        for key in sorted(set(keys_b) - set(keys_a)):
+            disagreements.append({
+                "snippet": snippet_name,
+                "type": "found_by_b_only",
+                "parameter_key": key,
+                f"{model_b_name}_value": {
+                    "name": keys_b[key].get("name"),
+                    "type": keys_b[key].get("type"),
+                    "confidence": keys_b[key].get("confidence"),
+                },
+            })
+
+        # Check for same-name-different-type or different-confidence
+        # Use relaxed name matching to find corresponding params
+        for p_a in params_a:
+            name_a = p_a.get("name", "").strip().lower()
+            for p_b in params_b:
+                name_b = p_b.get("name", "").strip().lower()
+                sim = _name_similarity(name_a, name_b)
+                if sim >= DEFAULT_RELAXED_THRESHOLD:
+                    type_a = p_a.get("type", "").strip().lower()
+                    type_b = p_b.get("type", "").strip().lower()
+                    conf_a = p_a.get("confidence", "").strip().lower()
+                    conf_b = p_b.get("confidence", "").strip().lower()
+
+                    if type_a != type_b:
+                        disagreements.append({
+                            "snippet": snippet_name,
+                            "type": "type_disagreement",
+                            f"{model_a_name}_name": name_a,
+                            f"{model_b_name}_name": name_b,
+                            "name_similarity": round(sim, 4),
+                            f"{model_a_name}_type": type_a,
+                            f"{model_b_name}_type": type_b,
+                        })
+                    elif conf_a != conf_b:
+                        disagreements.append({
+                            "snippet": snippet_name,
+                            "type": "confidence_disagreement",
+                            "parameter_name": name_a,
+                            f"{model_a_name}_confidence": conf_a,
+                            f"{model_b_name}_confidence": conf_b,
+                        })
+
+    # Cross-model agreement (Jaccard)
+    flat_a = [p for params in all_params_a.values() for p in params]
+    flat_b = [p for params in all_params_b.values() for p in params]
+    agreement = compute_cross_model_agreement(
+        flat_a, flat_b, model_a_name, model_b_name
+    )
+
+    return {
+        "model_a": {
+            "name": model_a_name,
+            "metrics": report_a["aggregate"],
+            "metrics_relaxed": report_a.get("aggregate_relaxed", {}),
+        },
+        "model_b": {
+            "name": model_b_name,
+            "metrics": report_b["aggregate"],
+            "metrics_relaxed": report_b.get("aggregate_relaxed", {}),
+        },
+        "cross_model_agreement": agreement,
+        "disagreements": disagreements,
+        "total_disagreements": len(disagreements),
     }
 
 

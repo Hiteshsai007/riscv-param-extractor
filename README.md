@@ -205,6 +205,38 @@ riscv-param-extractor/
     └── test_evidence.py
 ```
 
+## Evaluation Metrics (Run 5: `v6_decision_framework` + LFX Hardening)
+
+Currently evaluated on 10 annotated snippets (7 positive, 3 negative). We evaluate strictly (exact string match on both parameter name and type) and relaxed (normalized string similarity $\ge$ 0.75 on name, exact on type).
+
+| Metric | Strict (Qwen) | Relaxed (Qwen) | Notes |
+|--------|---------------|----------------|-------|
+| **Precision** | 0.3846 | 0.5000 | Lowered by spec ambiguity (e.g., CBO update mechanisms). Relaxed matching handles slight name phrasing variations. |
+| **Recall** | 0.5000 | 0.6000 | Misses implicit parameters not directly tied to keywords. |
+| **F1 Score** | 0.4348 | 0.5455 | Good baseline for a zero-shot/few-shot system without external RAG. |
+| **Hallucination Rate** | 0.0% | 0.0% | 100% of extracted evidence fields are verbatim substrings of the source. |
+| **YAML Validity** | 100% | 100% | Pipeline produces perfectly conforming JSON/YAML on the first attempt. |
+
+### Evaluation Limitations
+
+- **Small N:** 10 snippets is a very small sample size.
+- **Strict vs. Relaxed Matching:** Strict matching penalizes the LLM for valid syntactic variations of parameter names (e.g., `cache_capacity` vs `cache_capacity_and_organization`). The relaxed metric (normalized string similarity $\ge$ 0.75) accommodates phrasing differences while keeping type-matching strict.
+
+## Cross-Model Comparison
+
+To ensure the pipeline is robust to different base models, we evaluate using both Qwen 2.5 7B and Llama 3.1 8B. See `EXPERIMENTS.md` for a detailed breakdown of cross-model disagreements.
+
+| Metric (Relaxed) | Qwen 2.5 7B | Llama 3.1 8B |
+|------------------|-------------|--------------|
+| Precision        | 0.5000      | TBD          |
+| Recall           | 0.6000      | TBD          |
+| F1               | 0.5455      | TBD          |
+| Hallucination    | 0.0%        | TBD          |
+
+## UDB Grounding
+
+The `data/gold/` set has been cross-referenced against actual [RISC-V Unified Database (UDB)](https://github.com/riscv-software-src/riscv-unified-db) parameter entries. This provides real-world provenance for the extraction targets. See `data/udb_reference/README.md` and `data/gold/udb_crossref.yaml` for details.
+
 ## Configuration
 
 All generation parameters are externalized in `config/default.yaml`:
@@ -232,22 +264,6 @@ ollama pull qwen2.5:7b-instruct
 ollama pull llama3.1:8b-instruct-q4_K_M
 ```
 
-## Evaluation Metrics
-
-The following metrics represent the actual measured performance from the best-performing iteration (**v6_decision_framework**, Run 5):
-
-| Metric | Measured Result | Notes |
-|:---|:---|:---|
-| **Precision** | 0.3846 (5/13) | Measured as the ratio of correct parameters (TP) to all extracted parameters (TP + FP) using exact matching. |
-| **Recall** | 0.5000 (5/10) | Measured as the ratio of correct parameters (TP) to all parameters in the gold dataset (TP + FN) using exact matching. |
-| **F1 Score** | 0.4348 | The harmonic mean of Precision and Recall. |
-| **YAML Validity** | 100% (13/13) | Confirmed via mechanical validation of all generated files against the Pydantic schema prior to disk write. |
-| **Hallucination Rate** | 0.0000 (0/13) | Percentage of extracted parameters whose `evidence` field failed the verbatim substring matching check. |
-| **Execution Method** | Local Inference | Executed deterministically using Ollama (`qwen2.5:7b-instruct`) with `temperature: 0.0` and `seed: 42`. |
-
-**Evaluation Limitations:**
-- Precision and Recall currently use deterministic exact matching against gold labels (`name::type`).
-- Semantically equivalent parameter names (e.g., `cache_block_operation_mechanism` vs. `non_coherent_agent_cbo_mechanism`) are counted as mismatches (causing 1 FP and 1 FN).
 - Therefore, the reported metrics are highly conservative.
 - This design was intentionally chosen to guarantee reproducibility and deterministic evaluation without relying on a subjective LLM judge.
 

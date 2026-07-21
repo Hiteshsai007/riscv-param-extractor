@@ -1,0 +1,32 @@
+cache_block_size:
+  udb_status: "confirmed"
+  udb_param: "CACHE_BLOCK_SIZE"
+  udb_path: "spec/std/isa/param/CACHE_BLOCK_SIZE.yaml"
+  notes: "Direct match — UDB defines this as integer with min 1"
+cache_capacity_and_organization:
+  udb_status: "absent"
+  notes: "Not explicitly modeled as a parameter in UDB currently"
+wlrl_supported_values:
+  udb_status: "absent"
+  notes: "WLRL behavior is modeled via CsrFieldType in UDB, not as a standalone param"
+wlrl_illegal_write_exception:
+  udb_status: "absent"
+  notes: "Exception behavior on CSR write is handled via instruction semantics in UDB"
+warl_supported_values:
+  udb_status: "absent"
+  notes: "WARL behavior is modeled via CsrFieldType in UDB, not as a standalone param"
+non_coherent_agent_cbo_mechanism:
+  udb_status: "absent"
+  notes: "System-level mechanism, outside scope of current UDB ISA parameters"
+cmo_trigger_module_behavior:
+  udb_status: "absent"
+  notes: "Debug interaction, not explicitly modeled in param/"
+cmo_trigger_match_type:
+  udb_status: "absent"
+  notes: "Debug interaction, not explicitly modeled in param/"
+cbo_zero_atomicity_and_granularity:
+  udb_status: "absent"
+  notes: "Implementation freedom, not statically parameterized in UDB"
+csr_access_trap_capability:
+  udb_status: "absent"
+  notes: "Virtualization capability, handled via CSR semantics"
