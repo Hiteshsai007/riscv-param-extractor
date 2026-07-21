@@ -36,7 +36,7 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 
 <a id="deliverable-2"></a>
 ### Deliverable 2 — Prompt Engineering Journey
-- **Prompt Engineering Journey:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and finally a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`).
+- **Prompt Engineering Journey:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`). *Note: `v6` remains the evaluated best; `v7_lfx_hardening` is currently an unevaluated draft incorporating cross-model lessons.*
 - **Prompt Refinement:** Iterations were driven by failure analysis on the gold dataset, resolving issues like type confusion (`boolean` vs `enumerated`) and multi-parameter extraction halting.
 - **Hallucination Mitigation Strategy:** A strict, deterministic hallucination validation gate is implemented in Python (`validate_yaml.py`). The LLM must output an `evidence` field, which is checked to ensure it is a verbatim, character-for-character substring of the source text. If not, it is flagged as a hallucination.
 - **Lessons Learned:** Instruction-tuned 7B models strictly require 1-shot formatting templates for Pydantic schema compliance. Explicit contrastive examples are essential for boundary detection. The complete iteration log is in `EXPERIMENTS.md`.

@@ -72,3 +72,16 @@ All prompt versions, their changes, rationale, and resulting metric deltas.
 Added a self-verification step for verbatim evidence strings.
 
 **Rationale:** Unstructured Chain-of-Thought still led to context loss in borderline cases. By forcing the model to explicitly answer the three core questions defining an architectural parameter, we aim to mechanically guide its reasoning toward higher precision and recall.
+
+---
+
+## v7_lfx_hardening.md — UDB Alignment & Anti-Hallucination Guardrails (Draft)
+
+**Change:** 
+- Added a "UDB Target Alignment" section instructing the LLM to map extracted pipeline types directly to UDB schemas (`integer`, `boolean`, etc.).
+- Included strict rules explicitly forbidding markdown wrappers around the YAML block and hallucinated evidence, directly addressing the Llama 3.1 8B failure modes.
+- Reinforced instructions against premature halting on multi-parameter snippets.
+
+**Rationale:** During the LFX cross-model hardening phase, the Llama 3.1 8B evaluation revealed severe formatting (Markdown wrapper) and hallucination (fabricated evidence) vulnerabilities that crashed the evaluation pipeline. The `generate_spec_tags.py` workflow also highlighted the need for canonical UDB schema alignment. This prompt drafts those guardrails for future validation.
+
+**Metrics:** _Unevaluated Draft_ — This version has not yet been run against the gold/UDB evaluation harness and serves as a draft incorporating cross-model disagreement patterns and UDB schema lessons.
