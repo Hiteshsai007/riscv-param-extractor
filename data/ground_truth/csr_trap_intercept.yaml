@@ -1,0 +1,17 @@
+# Ground Truth: csr_trap_intercept.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/csr_trap_intercept.txt
+source_section: "Privileged Spec §priv-csrs"
+
+expected_parameters:
+  - name: "csr_access_trap_capability"
+    type: "capability"
+    isa_visible: true
+    visibility_justification: >
+      If implemented, a CSR access by a less-privileged level that would
+      normally succeed instead traps to the more-privileged level. This
+      changes the architecturally-defined behavior of CSR read/write
+      instructions — they raise an exception instead of completing.
+
+expected_rejections: []

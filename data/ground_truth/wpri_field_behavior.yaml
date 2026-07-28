@@ -1,0 +1,21 @@
+# Ground Truth: wpri_field_behavior.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/wpri_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+
+expected_parameters: []
+
+expected_rejections:
+  - candidate_text: "WPRI fields must be read-only zero"
+    reason: "CONSTRAINT_NOT_PARAMETER"
+    isa_visible: false
+    visibility_justification: >
+      WPRI fields have mandatory behavior: implementations MUST make them
+      read-only zero. There is no implementation choice — all compliant
+      hardware behaves identically. This is a constraint, not a parameter.
+
+notes: >
+  This is a negative gold case. No parameters should be extracted from
+  WPRI text. The existing pipeline incorrectly extracted parameters here
+  in some runs (v6 regression).

@@ -1,0 +1,24 @@
+# Ground Truth: warl_field_behavior.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/warl_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+
+expected_parameters:
+  - name: "warl_supported_values"
+    type: "field_behavior"
+    isa_visible: true
+    visibility_justification: >
+      WARL fields allow writes of any value but read back only legal
+      values. The set of legal values is implementation-defined and
+      directly observable via CSR read instructions.
+
+expected_rejections:
+  - candidate_text: "WARL read behavior when writing illegal values"
+    reason: "CONSTRAINT_NOT_PARAMETER"
+    isa_visible: true
+    visibility_justification: >
+      The spec mandates what WARL fields must do on illegal writes
+      (return a legal value). This is not a choice — it is a mandatory
+      behavior. The variability is in WHICH values are legal (covered
+      by warl_supported_values), not in the read-back mechanism.

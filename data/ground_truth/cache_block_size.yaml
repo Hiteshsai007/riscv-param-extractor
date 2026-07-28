@@ -1,0 +1,47 @@
+# Ground Truth: cache_block_size.txt
+# Precommitted BEFORE any pipeline run. Classification decisions justified below.
+#
+# Snippet source: Unprivileged Spec, CMO §cmo
+# "The capacity and organization of a cache and the size of a cache block are
+#  both implementation-specific, and the execution environment provides software
+#  a means to discover information about the caches and cache blocks in a system.
+#  In the initial set of CMO extensions, the size of a cache block shall be
+#  uniform throughout the system."
+
+snippet_file: data/raw_snippets/cache_block_size.txt
+source_section: "Unprivileged Spec, CMO §cmo"
+
+expected_parameters:
+  - name: "cache_block_size"
+    type: "numeric_range"
+    isa_visible: true
+    visibility_justification: >
+      CMO instructions (CBO.ZERO, CBO.CLEAN, CBO.FLUSH, CBO.INVAL) operate on
+      cache-block-sized granules. The block size determines the effective address
+      range zeroed or flushed by a single instruction execution. Software discovers
+      this value through the execution environment, confirming it is ISA-observable.
+    rationale: >
+      The spec says "the size of a cache block [is] implementation-specific" and
+      constrains it to be NAPOT and uniform. CMO instruction behavior depends on
+      this value, making it ISA-visible.
+
+expected_rejections:
+  - candidate_text: "The capacity and organization of a cache"
+    reason: "NOT_ISA_VISIBLE"
+    isa_visible: false
+    visibility_justification: >
+      No RISC-V instruction's architecturally-defined behavior depends on cache
+      capacity or internal organization (set-associativity, replacement policy,
+      etc.). These are microarchitectural details. While the execution environment
+      may expose them for informational purposes, no ISA-defined instruction
+      produces different *specified* behavior based on cache capacity. The CMO
+      extensions operate at cache-block granularity, not cache-capacity granularity.
+    rationale: >
+      Although the text says "capacity and organization" are "implementation-specific",
+      this is a microarchitectural detail, not an ISA-visible parameter. The trigger
+      word fires, the verbatim quote is real, but the classification is wrong.
+
+notes: >
+  This is the canonical test case for the ISA-visibility gate (R1). The prior
+  gold label incorrectly listed cache_capacity_and_organization as a valid
+  parameter. This ground truth corrects that: it is rejected as NOT_ISA_VISIBLE.

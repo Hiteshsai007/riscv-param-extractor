@@ -24,6 +24,16 @@ class ParameterType(str, Enum):
     CAPABILITY = "capability"  # Optional hardware capability (e.g., trap-and-emulate)
 
 
+class RejectionReason(str, Enum):
+    """Closed set of reason codes for why a candidate was NOT classified as a parameter."""
+
+    NOT_ISA_VISIBLE = "NOT_ISA_VISIBLE"  # Implementation-specific but not observable via the ISA
+    CONSTRAINT_NOT_PARAMETER = "CONSTRAINT_NOT_PARAMETER"  # Normative "shall"/"must" mandate, not a choice
+    NOT_STATED_IN_TEXT = "NOT_STATED_IN_TEXT"  # Plausible from general knowledge but not in the snippet
+    DUPLICATE = "DUPLICATE"  # Same parameter as an already-extracted candidate
+    MALFORMED_EVIDENCE = "MALFORMED_EVIDENCE"  # Evidence field failed the verbatim substring check
+
+
 class ConfidenceLevel(str, Enum):
     """Confidence that the extracted item is a genuine architectural parameter."""
 
@@ -116,6 +126,18 @@ class Parameter(BaseModel):
         ...,
         description="Confidence that this is a genuine architectural parameter",
     )
+    isa_visible: Optional[bool] = Field(
+        default=None,
+        description="Whether this parameter's value is observable through ISA-defined "
+        "instruction or CSR behavior. A candidate cannot be a parameter unless "
+        "isa_visible=true.",
+    )
+    visibility_justification: Optional[str] = Field(
+        default=None,
+        description="Explanation of which instruction or CSR behavior depends on this "
+        "parameter's value. Must reference specific ISA behavior, not just "
+        "repeat the trigger phrase.",
+    )
 
     @field_validator("evidence")
     @classmethod
@@ -132,6 +154,31 @@ class Parameter(BaseModel):
         if not v.strip():
             raise ValueError("Parameter name cannot be empty")
         return v.strip()
+
+
+class RejectedCandidate(BaseModel):
+    """A candidate that was evaluated but NOT classified as a parameter."""
+
+    candidate_text: str = Field(
+        ...,
+        description="The candidate sentence or phrase that was evaluated",
+    )
+    reason: RejectionReason = Field(
+        ...,
+        description="Why this candidate was rejected (closed enum)",
+    )
+    detail: str = Field(
+        default="",
+        description="Free-text explanation of the rejection decision",
+    )
+    isa_visible: Optional[bool] = Field(
+        default=None,
+        description="Whether this candidate's value would be ISA-visible (false for NOT_ISA_VISIBLE)",
+    )
+    visibility_justification: Optional[str] = Field(
+        default=None,
+        description="Explanation of why the candidate is or is not ISA-visible",
+    )
 
 
 class ExtractionResult(BaseModel):
@@ -157,9 +204,9 @@ class ExtractionResult(BaseModel):
         default_factory=list,
         description="List of extracted and validated parameters",
     )
-    rejected_candidates: list[ClassificationResult] = Field(
+    rejected_candidates: list[RejectedCandidate | ClassificationResult] = Field(
         default_factory=list,
-        description="Candidates classified as non-parameters with reasons",
+        description="Candidates classified as non-parameters with structured reason codes",
     )
     hallucination_flags: list[str] = Field(
         default_factory=list,

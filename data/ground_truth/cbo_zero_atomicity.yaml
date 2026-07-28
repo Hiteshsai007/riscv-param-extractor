@@ -1,0 +1,22 @@
+# Ground Truth: cbo_zero_atomicity.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/cbo_zero_atomicity.txt
+source_section: "Unprivileged Spec, CMO §cmo"
+
+expected_parameters:
+  - name: "cbo_zero_atomicity_and_granularity"
+    type: "enumerated"
+    isa_visible: true
+    visibility_justification: >
+      CBO.ZERO writes zeros to a cache block. The order and granularity of
+      those writes are implementation-specific and observable by concurrent
+      threads/harts — a concurrent load may see a partially-zeroed block.
+      This is ISA-visible because the memory model makes the intermediate
+      states architecturally observable.
+
+expected_rejections: []
+
+notes: >
+  Single-parameter snippet. The variability axis is "any order and with any
+  granularity" — clearly enumerated, not boolean.

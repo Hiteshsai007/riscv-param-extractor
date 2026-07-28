@@ -1,0 +1,19 @@
+# Ground Truth: csr_address_encoding.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/csr_address_encoding.txt
+source_section: "Privileged Spec §priv-csrs"
+
+expected_parameters: []
+
+expected_rejections:
+  - candidate_text: "CSR address encoding convention"
+    reason: "CONSTRAINT_NOT_PARAMETER"
+    isa_visible: false
+    visibility_justification: >
+      The CSR address encoding is a fixed architectural convention defined
+      by the spec. There is no implementation choice — the bit layout is
+      mandated. This is structural_convention, not a parameter.
+
+notes: >
+  Negative case. CSR address encoding is fixed by the spec, not variable.

@@ -86,6 +86,47 @@ def validate_evidence_grounding(
     return False, "Evidence NOT found in source text (hallucination)"
 
 
+def validate_evidence_heuristics(
+    evidence: str,
+    source_text: str,
+) -> list[str]:
+    """
+    Apply secondary heuristic checks on evidence strings beyond
+    the verbatim substring match.
+
+    Returns:
+        List of warning strings. Empty list = all checks passed.
+    """
+    warnings = []
+
+    # Ban ellipses outright — if a quote needs an ellipsis, it isn't clean grounding
+    if "..." in evidence or "…" in evidence:
+        warnings.append(
+            "ELLIPSIS_IN_EVIDENCE: Evidence contains '...' or '…'. "
+            "Ellipses indicate a truncated quote that may omit qualifying context."
+        )
+
+    # Reject evidence that starts mid-clause on a lowercase word directly
+    # following a conjunction (and, or, but) in the source text.
+    evidence_stripped = evidence.strip()
+    if evidence_stripped and evidence_stripped[0].islower():
+        # Find where this evidence appears in the source
+        idx = source_text.find(evidence_stripped)
+        if idx > 0:
+            # Look at what comes immediately before the evidence in the source
+            preceding = source_text[:idx].rstrip()
+            if preceding:
+                last_word = preceding.split()[-1].rstrip(".,;:").lower()
+                if last_word in ("and", "or", "but"):
+                    warnings.append(
+                        f"MID_CLAUSE_EVIDENCE: Evidence starts mid-clause after "
+                        f"conjunction '{last_word}'. The full source sentence may "
+                        f"change the meaning of this fragment."
+                    )
+
+    return warnings
+
+
 def validate_extraction_result(
     result: ExtractionResult,
     source_text: str,
@@ -143,6 +184,15 @@ def validate_extraction_result(
             param_report["evidence_detail"] = detail
 
         report["details"].append(param_report)
+
+    # R6: Heuristic evidence checks (secondary, advisory)
+    report["evidence_heuristic_warnings"] = []
+    for param in result.parameters:
+        heuristic_warnings = validate_evidence_heuristics(param.evidence, source_text)
+        for w in heuristic_warnings:
+            report["evidence_heuristic_warnings"].append(
+                f"{param.name}: {w}"
+            )
 
     return report
 

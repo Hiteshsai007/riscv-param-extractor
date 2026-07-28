@@ -1,0 +1,20 @@
+# Ground Truth: debug_csr_access.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/debug_csr_access.txt
+source_section: "Privileged Spec, Debug §debug"
+
+expected_parameters: []
+
+expected_rejections:
+  - candidate_text: "Implementations should raise illegal-instruction exceptions"
+    reason: "CONSTRAINT_NOT_PARAMETER"
+    isa_visible: false
+    visibility_justification: >
+      The word "should" here is normative — the spec requires this behavior.
+      There is no genuine implementation choice. All compliant implementations
+      must raise the exception. This is mandatory_behavior, not a parameter.
+
+notes: >
+  Negative case. The prior pipeline (v5) falsely extracted this as a
+  boolean parameter. The "should" is normative in RISC-V spec language.

@@ -1,0 +1,17 @@
+# Ground Truth: cmo_trigger_behavior.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/cmo_trigger_behavior.txt
+source_section: "Unprivileged Spec, CMO §cmo"
+
+expected_parameters:
+  - name: "cmo_load_store_mechanism"
+    type: "enumerated"
+    isa_visible: true
+    visibility_justification: >
+      How the CMO instructions interact with loads and stores is
+      implementation-specific. Software must know which mechanism
+      the hardware uses to correctly sequence CMO and data-access
+      instructions, making this ISA-visible.
+
+expected_rejections: []

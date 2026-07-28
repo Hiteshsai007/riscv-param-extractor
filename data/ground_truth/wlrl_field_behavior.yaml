@@ -1,0 +1,25 @@
+# Ground Truth: wlrl_field_behavior.txt
+# Precommitted BEFORE any pipeline run.
+
+snippet_file: data/raw_snippets/wlrl_field_behavior.txt
+source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
+
+expected_parameters:
+  - name: "wlrl_supported_values"
+    type: "field_behavior"
+    isa_visible: true
+    visibility_justification: >
+      WLRL fields define which bit encodings are legal for CSR writes.
+      Software writing to a WLRL CSR field will observe different
+      read-back values depending on the implementation's chosen legal
+      set. This directly affects CSR read/write instruction behavior.
+  - name: "wlrl_illegal_write_exception"
+    type: "boolean"
+    isa_visible: true
+    visibility_justification: >
+      Whether writing an illegal value to a WLRL field raises an
+      illegal-instruction exception is ISA-visible: the write either
+      traps or silently ignores the illegal value, changing the
+      observable behavior of the CSRRW/CSRRS/CSRRC instructions.
+
+expected_rejections: []
