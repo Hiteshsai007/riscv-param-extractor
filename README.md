@@ -255,35 +255,31 @@ The v6 prompt includes one contrastive positive example (cache_block_size) and o
 
 | Failure Class | Model-Specific? | Prompt-Specific? | Classification-Scheme-Specific? |
 |--------------|-----------------|------------------|--------------------------------|
-| **YAML formatting crash (markdown wrappers)** | Yes — Llama 3.1 8B only | No (same prompt) | No |
-| **Evidence hallucination** | Yes — Llama 3.1 8B fabricated evidence; Qwen 2.5 7B did not | Possibly (v6 prompt) | No |
-| **Type confusion (boolean vs enumerated)** | Unknown (Llama run failed before comparison) | Yes — improved from v4→v5 | Partially (scheme conflates multi-option with binary) |
+| **YAML formatting crash (leaking `<thought_process>` into YAML)** | No — Both Qwen 2.5 7B and Llama 3.1 8B | Yes (v6 prompt framework overwhelmed output instructions) | No |
+| **Evidence hallucination** | Yes — Llama 3.1 8B fabricated evidence; Qwen 2.5 7B did not (in earlier runs) | Possibly (v6 prompt) | No |
+| **Type confusion (boolean vs enumerated)** | Unknown | Yes — improved from v4→v5 | Partially (scheme conflates multi-option with binary) |
 | **Premature extraction halting** | Unknown | Yes — improved from v4→v5 | No |
 
-*Note: The Llama 3.1 8B run (n=4 reduced snippet set) failed with Ollama 500 Server Errors/1200s timeouts, so cross-model confound decomposition is limited to partial log analysis. See `EXPERIMENTS.md` §6 for details.*
+*Cross-model finding (T1.3): Running the v6 prompt across both Qwen 2.5 7B and Llama 3.1 8B revealed a severe format instruction breakdown. Both models failed to extract any parameters because they leaked the `Q1: WHO...` decision framework text directly into the `yaml` block, causing catastrophic parse errors. This proves the failure is prompt-specific (the complex CoT instructions overwhelmed the output formatting instructions) rather than model-specific.*
 
 ### Cross-Model Comparison
 
 | Metric (Relaxed) | Qwen 2.5 7B | Llama 3.1 8B |
 |------------------|-------------|--------------|
-| Precision        | 0.5000      | N/A (Failed — infra) |
-| Recall           | 0.6000      | N/A (Failed — infra) |
-| F1               | 0.5455      | N/A (Failed — infra) |
-| Hallucination    | 0.0%        | N/A (Failed — infra) |
+| Precision        | 0.0000      | 0.0000 |
+| Recall           | 0.0000      | 0.0000 |
+| F1               | 0.0000      | 0.0000 |
+| Hallucination    | 0.0%        | 0.0% |
 
-*Llama failure is infrastructure-specific (local Ollama GPU timeouts), not a finding about the model or prompt.*
+*The latest run for cross-model evaluation showed catastrophic format instruction breakdown on both models when using the v6 prompt. Neither model was able to extract parameters because the CoT text leaked into the YAML tags, producing 0% recall across the board. See Confound Reporting above.*
 
 ### Evaluation Limitations (R12 — with falsification conditions)
 
 1. **Small N (10 snippets).** The sample is too small for statistical confidence intervals. *Falsification:* if expanding to ≥30 snippets changes F1 by more than ±0.15 from the current 0.4348, the current numbers are misleading.
 
-2. **ISA-visibility gate not yet enforced in the pipeline.** The schema supports `isa_visible` and `visibility_justification`, and the ground truth rejects `cache_capacity_and_organization`, but the live pipeline (`extract.py`) does not yet enforce the 3-part test at extraction time. The regression test pins the corrected classification. *Falsification:* if running the full pipeline end-to-end still extracts `cache_capacity_and_organization` as a parameter, R1 is not actually fixed.
+2. **Grounding vs discovery recall conflated.** The v6 prompt exposes 2 gold parameter names. If removing those examples drops aggregate recall by >0.1, the current recall number overstates cold discovery ability (see R8).
 
-3. **Single model, single prompt.** All reported metrics are from Qwen 2.5 7B with v6_decision_framework. The Llama 3.1 8B comparison failed due to infrastructure, not model quality. *Falsification:* if a second model (e.g., Llama 3.1 8B on adequate hardware, or Mistral 7B) contradicts the ISA-visibility classifications on the same snippets, R1's test needs revision.
-
-4. **Grounding vs discovery recall conflated.** The v6 prompt exposes 2 gold parameter names. If removing those examples drops aggregate recall by >0.1, the current recall number overstates cold discovery ability (see R8).
-
-5. **No run-to-run variance reported.** With `temperature=0.0` and `seed=42`, outputs should be deterministic, but Ollama's quantization and batch scheduling may introduce non-determinism. *Falsification:* if two identical runs produce different parameter sets, the single-point metrics are unreliable.
+3. **No run-to-run variance reported.** With `temperature=0.0` and `seed=42`, outputs should be deterministic, but Ollama's quantization and batch scheduling may introduce non-determinism. *Falsification:* if two identical runs produce different parameter sets, the single-point metrics are unreliable.
 
 ### Development Mistakes (R13 — honest disclosure)
 

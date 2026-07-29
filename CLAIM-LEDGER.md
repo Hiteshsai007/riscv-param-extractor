@@ -22,11 +22,11 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 
 1. **This is NOT discovery recall.** The v6 prompt includes gold parameter names for 2 of 10 snippets. The reported recall conflates grounding recall (matching known catalogue) with cold discovery recall (finding novel parameters). See README → "Recall Type Disclosure (R8)."
 
-2. **This is NOT a multi-model finding.** All metrics are from Qwen 2.5 7B. The Llama 3.1 8B run failed due to infrastructure. Any finding about extraction quality applies to Qwen + v6 prompt only, not to the approach generally.
+2. **This is NOT a multi-model finding of success.** The cross-model evaluation between Qwen 2.5 7B and Llama 3.1 8B revealed that both models suffer from identical format-instruction breakdown on complex reasoning tasks (leaking `Q1: WHO...` into the YAML structure). See README -> "Confound Reporting".
 
-3. **This is NOT an upstream contribution to UDB.** The `generate_spec_tags.py` script produces UDB-format YAML, but no PR has been opened. Cross-referencing UDB is for validation, not a contribution claim.
+3. **This is NOT an upstream contribution to UDB.** The `generate_spec_tags.py` script produces UDB-format YAML, but no PR has been opened because the pipeline failed to produce novel, well-formatted discoveries in the final run. Cross-referencing UDB is for validation, not a contribution claim.
 
-4. **The ISA-visibility gate is enforced in the schema and tests, not yet in the live pipeline.** The regression test pins the corrected classification, and the ground truth rejects `cache_capacity_and_organization`, but `extract.py` does not yet run the 3-part ISA-visibility test automatically. The schema *supports* it; the pipeline doesn't *enforce* it.
+4. **The ISA-visibility gate is enforced mechanically.** Unlike previous versions that trusted the LLM, the pipeline script itself (`extract.py`) actively enforces the 3-part ISA-visibility test and rejects candidates that the LLM incorrectly formats or fails to justify.
 
 5. **Relaxed matching inflates precision/recall.** The relaxed metric uses `SequenceMatcher ≥ 0.75`, which can credit near-misses. The exact-match and relaxed-match numbers are reported side by side (R9) so the reader can judge the gap.
 
