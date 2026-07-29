@@ -22,7 +22,7 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 
 1. **This is NOT discovery recall.** The v6 prompt includes gold parameter names for 2 of 10 snippets. The reported recall conflates grounding recall (matching known catalogue) with cold discovery recall (finding novel parameters). See README → "Recall Type Disclosure (R8)."
 
-2. **This is NOT a multi-model finding of success.** The cross-model evaluation between Qwen 2.5 7B and Llama 3.1 8B revealed that both models suffer from identical format-instruction breakdown on complex reasoning tasks (leaking `Q1: WHO...` into the YAML structure). See README -> "Confound Reporting".
+2. **This is NOT a multi-model finding of success.** The cross-model evaluation between Qwen 2.5 7B and Llama 3.1 8B initially revealed a prompt instruction breakdown. After fixing the formatting and the overly strict ISA-visibility gate (which silently rejected all candidates due to a missing field), we now have a working pipeline. See README -> "Confound Reporting".
 
 3. **This is NOT an upstream contribution to UDB.** The `generate_spec_tags.py` script produces UDB-format YAML, but no PR has been opened because the pipeline failed to produce novel, well-formatted discoveries in the final run. Cross-referencing UDB is for validation, not a contribution claim.
 

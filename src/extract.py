@@ -73,8 +73,12 @@ def enforce_isa_visibility_gate(param_dict: dict) -> tuple[bool, str | None]:
     """
     Returns (allowed, rejection_reason). Runs regardless of what the LLM claimed.
     """
+    if "isa_visible" not in param_dict:
+        return False, "MISSING_ISA_VISIBILITY_FIELD"
+        
     if not param_dict.get("isa_visible"):
         return False, "NOT_ISA_VISIBLE"
+        
     justification = param_dict.get("visibility_justification", "")
     if len(justification.strip()) < 20:
         return False, "MALFORMED_EVIDENCE"  # justification too thin to be real
@@ -89,17 +93,33 @@ def _parse_yaml_from_response(response_text: str) -> tuple[list[dict[str, Any]],
     This function handles both cases and extracts parameters and rejections.
     """
     # Try to extract YAML from markdown code fences
-    yaml_match = re.search(
-        r'```(?:yaml|YAML)?\s*(.*?)\s*```',
-        response_text,
-        re.DOTALL,
-    )
+    # 1. Strip out thought process completely
+    cleaned = re.sub(r'<thought_process>.*?</thought_process>', '', response_text, flags=re.DOTALL)
+    
+    # 2. Extract lines that are between ``` and ```, or starting with '- name:'
+    lines = cleaned.splitlines()
+    in_block = False
+    yaml_lines = []
+    
+    for line in lines:
+        stripped = line.strip()
+        # Toggle block mode when encountering ``` (yaml or not)
+        if stripped.startswith('```'):
+            in_block = not in_block
+            continue
+        
+        if in_block:
+            yaml_lines.append(line)
+        elif stripped.startswith('- name:') or stripped.startswith('- candidate_text:'):
+            # If the LLM forgot to open a block, assume we are inside one now
+            in_block = True
+            yaml_lines.append(line)
 
-    if yaml_match:
-        yaml_text = yaml_match.group(1).strip()
-    else:
-        # Try the whole response as YAML
-        yaml_text = response_text.strip()
+    yaml_text = "\n".join(yaml_lines).strip()
+    
+    if not yaml_text:
+        # Fallback if no blocks found at all
+        yaml_text = cleaned.strip()
 
     if not yaml_text or yaml_text.lower() in ("none", "null", "[]", "no parameters found"):
         return [], []

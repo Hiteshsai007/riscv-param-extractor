@@ -63,9 +63,10 @@ A single passage often contains MULTIPLE independent parameters. Examine each ca
 
 ## Output Format
 
-1. Write a `<thought_process>` block analyzing EACH candidate using the Q1→Q2→Q3 framework.
-2. Output a YAML array in ```yaml fences.
-3. If no parameters found, output `[]`.
+1. Write a `<thought_process>` block analyzing EACH candidate using the Q1→Q2→Q3 framework. DO NOT wrap this thought process in backticks or markdown code fences.
+2. Output a YAML array in ```yaml fences AFTER the thought process.
+3. Every extracted parameter MUST include `isa_visible` and `visibility_justification`.
+4. If no parameters found, output `[]`.
 
 ## Schema
 {schema}
@@ -89,6 +90,8 @@ Name: csr_access_trap_capability (domain: CSR, specific: access trap)
   trigger_keyword: "might"
   source_section: "Privileged Spec §priv-csrs"
   confidence: "high"
+  isa_visible: true
+  visibility_justification: "Software can observe this trap when executing a CSR access instruction."
 ```
 
 ### POSITIVE: Enumerated mechanism (NOT boolean)
@@ -108,6 +111,8 @@ Name: non_coherent_agent_cbo_mechanism (domain: non-coherent agent, specific: CB
   trigger_keyword: "implementation-specific"
   source_section: "Unprivileged Spec, CMO §cmo"
   confidence: "high"
+  isa_visible: true
+  visibility_justification: "Determines how software must interact with CBO instructions."
 ```
 
 ### POSITIVE: Two parameters from WLRL text
@@ -134,6 +139,8 @@ Name: wlrl_illegal_write_exception
   trigger_keyword: "WLRL"
   source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
   confidence: "high"
+  isa_visible: true
+  visibility_justification: "Software can read back the CSR to see which written values stick."
 - name: "wlrl_illegal_write_exception"
   description: "Whether the implementation raises an illegal-instruction exception when software writes a non-supported value to a WLRL field."
   type: "boolean"
@@ -142,6 +149,8 @@ Name: wlrl_illegal_write_exception
   trigger_keyword: "may"
   source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
   confidence: "high"
+  isa_visible: true
+  visibility_justification: "Software writing an unsupported value will either trap or proceed."
 ```
 
 ### NEGATIVE: WPRI — mandatory, NOT a parameter

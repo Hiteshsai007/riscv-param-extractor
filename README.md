@@ -255,12 +255,9 @@ The v6 prompt includes one contrastive positive example (cache_block_size) and o
 
 | Failure Class | Model-Specific? | Prompt-Specific? | Classification-Scheme-Specific? |
 |--------------|-----------------|------------------|--------------------------------|
-| **YAML formatting crash (leaking `<thought_process>` into YAML)** | No — Both Qwen 2.5 7B and Llama 3.1 8B | Yes (v6 prompt framework overwhelmed output instructions) | No |
-| **Evidence hallucination** | Yes — Llama 3.1 8B fabricated evidence; Qwen 2.5 7B did not (in earlier runs) | Possibly (v6 prompt) | No |
-| **Type confusion (boolean vs enumerated)** | Unknown | Yes — improved from v4→v5 | Partially (scheme conflates multi-option with binary) |
-| **Premature extraction halting** | Unknown | Yes — improved from v4→v5 | No |
+| **YAML formatting crash & Gate failure** | No — Both models | Yes (prompt leaked thought_process + missing isa_visible field) | No |
 
-*Cross-model finding (T1.3): Running the v6 prompt across both Qwen 2.5 7B and Llama 3.1 8B revealed a severe format instruction breakdown. Both models failed to extract any parameters because they leaked the `Q1: WHO...` decision framework text directly into the `yaml` block, causing catastrophic parse errors. This proves the failure is prompt-specific (the complex CoT instructions overwhelmed the output formatting instructions) rather than model-specific.*
+*Phase 0 finding: The 0% extraction rate was caused by two interacting issues: (1) The LLM leaked `<thought_process>` tags outside markdown fences, breaking the naive regex parser, and (2) the v6 prompt did not instruct the LLM to output `isa_visible`, causing the new mechanical gate to silently reject all candidates. Both the parser and the prompt have been patched.*
 
 ### Cross-Model Comparison
 
