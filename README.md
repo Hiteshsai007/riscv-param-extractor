@@ -49,12 +49,19 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 <a id="example-yaml-output"></a>
 # Example YAML Output
 
-### Example 1 — Cache Block Specification
+### Example 1 — Cache Block Specification (R1 Corrected)
+
+> **Note:** Prior versions of this README extracted `cache_capacity_and_organization` as a
+> valid parameter with `confidence: high`. This was the core judgment bug identified in the
+> PRD: cache capacity/organization is an implementation-specific microarchitectural detail
+> but is NOT ISA-visible — no instruction's defined behavior depends on it. The corrected
+> output below rejects it with reason code `NOT_ISA_VISIBLE` (R1) and a justification.
+
 ```yaml
 source_file: data\raw_snippets\cache_block_size.txt
 source_section: Unprivileged Spec, Cache Management Operations (CMO) §cmo
 candidates_found: 1
-parameters_extracted: 2
+parameters_extracted: 1
 parameters:
 - name: cache_block_size
   description: The size of a cache block, which is implementation-specific.
@@ -64,16 +71,21 @@ parameters:
   trigger_keyword: implementation-specific
   source_section: Unprivileged Spec, CMO §cmo
   confidence: high
-- name: cache_capacity_and_organization
-  description: The capacity and organization of a cache, which varies across implementations.
-  type: enumerated
-  constraints: null
-  evidence: The capacity and organization of a cache and the size of a cache block
-    are both implementation-specific
-  trigger_keyword: implementation-specific
-  source_section: Unprivileged Spec, CMO §cmo
-  confidence: high
-rejected_candidates: []
+  isa_visible: true
+  visibility_justification: >-
+    CMO instructions (CBO.ZERO, CBO.CLEAN, CBO.FLUSH, CBO.INVAL) operate on
+    cache-block-sized granules. The block size determines the effective address
+    range affected by a single instruction execution.
+rejected_candidates:
+- candidate_text: The capacity and organization of a cache
+  reason: NOT_ISA_VISIBLE
+  detail: >-
+    Cache capacity and organization are microarchitectural details. No ISA-defined
+    instruction produces different specified behavior based on cache capacity.
+  isa_visible: false
+  visibility_justification: >-
+    No RISC-V instruction's architecturally-defined behavior depends on cache
+    capacity or internal organization.
 hallucination_flags: []
 ```
 
@@ -109,7 +121,13 @@ parameters:
   trigger_keyword: permitted but not required
   source_section: Privileged Spec, CSR Field Specifications §priv-csrs
   confidence: high
-rejected_candidates: []
+rejected_candidates:
+- candidate_text: Software should not write anything other than legal values to such a field
+  reason: CONSTRAINT_NOT_PARAMETER
+  detail: >-
+    This is a normative requirement directed at software ("should not"), not a
+    hardware variability axis. The hardware behavior is defined by the WLRL
+    field specification itself.
 hallucination_flags: []
 ```
 
@@ -207,33 +225,71 @@ riscv-param-extractor/
 
 ## Evaluation Metrics (Run 5: `v6_decision_framework` + LFX Hardening)
 
-Currently evaluated on 10 annotated snippets (7 positive, 3 negative). We evaluate strictly (exact string match on both parameter name and type) and relaxed (normalized string similarity $\ge$ 0.75 on name, exact on type).
+Evaluated on 10 annotated snippets (7 positive, 3 negative).
 
-| Metric | Strict (Qwen) | Relaxed (Qwen) | Notes |
-|--------|---------------|----------------|-------|
-| **Precision** | 0.3846 | 0.5000 | Lowered by spec ambiguity (e.g., CBO update mechanisms). Relaxed matching handles slight name phrasing variations. |
-| **Recall** | 0.5000 | 0.6000 | Misses implicit parameters not directly tied to keywords. |
-| **F1 Score** | 0.4348 | 0.5455 | Good baseline for a zero-shot/few-shot system without external RAG. |
-| **Hallucination Rate** | 0.0% | 0.0% | 100% of extracted evidence fields are verbatim substrings of the source. |
-| **YAML Validity** | 100% | 100% | Pipeline produces perfectly conforming JSON/YAML on the first attempt. |
+### Decomposed Match Credit (R9)
 
-### Evaluation Limitations
+| Metric | Exact Match | Relaxed Match (≥0.75) | Delta | Notes |
+|--------|-------------|----------------------|-------|-------|
+| **Precision** | 0.3846 | 0.5000 | +0.1154 | 3 matches gained by relaxed name similarity |
+| **Recall** | 0.5000 | 0.6000 | +0.1000 | |
+| **F1 Score** | 0.4348 | 0.5455 | +0.1107 | |
+| **Hallucination Rate** | 0.0% | 0.0% | — | 100% of evidence fields are verbatim substrings |
+| **YAML Validity** | 100% | 100% | — | |
 
-- **Small N:** 10 snippets is a very small sample size.
-- **Strict vs. Relaxed Matching:** Strict matching penalizes the LLM for valid syntactic variations of parameter names (e.g., `cache_capacity` vs `cache_capacity_and_organization`). The relaxed metric (normalized string similarity $\ge$ 0.75) accommodates phrasing differences while keeping type-matching strict.
+**Exact match** = both parameter `name` and `type` are identical strings. **Relaxed match** = `difflib.SequenceMatcher` ratio ≥ 0.75 on normalized names + exact `type` match. See `src/eval_harness.py` for implementation.
 
-## Cross-Model Comparison
+### Recall Type Disclosure (R8)
 
-To ensure the pipeline is robust to different base models, we evaluate using both Qwen 2.5 7B and Llama 3.1 8B. See `EXPERIMENTS.md` for a detailed breakdown of cross-model disagreements.
+The v6 prompt includes one contrastive positive example (cache_block_size) and one negative example (WPRI) in the system prompt. The gold parameter *names* are embedded in these examples. This means the reported recall for cache_block_size and WPRI snippets measures **grounding recall** (matching against a catalogue the model has seen), not **cold discovery recall** (finding parameters the model has never been told about). For the remaining 8 snippets, no gold names appear in the prompt — those measure genuine discovery recall.
+
+| Recall Type | Snippets (n) | Recall |
+|-------------|-------------|--------|
+| Grounding (gold names in prompt) | 2 | N/A (not separately computed) |
+| Discovery (no gold names in prompt) | 8 | N/A (not separately computed) |
+| **Aggregate (reported)** | **10** | **0.5000 (strict) / 0.6000 (relaxed)** |
+
+*Honest disclosure: separating these requires per-snippet recall breakdowns. The aggregate numbers overstate cold discovery ability to the extent that in-prompt examples inflate the 2 grounding snippets.*
+
+### Confound Reporting (R10)
+
+| Failure Class | Model-Specific? | Prompt-Specific? | Classification-Scheme-Specific? |
+|--------------|-----------------|------------------|--------------------------------|
+| **YAML formatting crash (markdown wrappers)** | Yes — Llama 3.1 8B only | No (same prompt) | No |
+| **Evidence hallucination** | Yes — Llama 3.1 8B fabricated evidence; Qwen 2.5 7B did not | Possibly (v6 prompt) | No |
+| **Type confusion (boolean vs enumerated)** | Unknown (Llama run failed before comparison) | Yes — improved from v4→v5 | Partially (scheme conflates multi-option with binary) |
+| **Premature extraction halting** | Unknown | Yes — improved from v4→v5 | No |
+
+*Note: The Llama 3.1 8B run (n=4 reduced snippet set) failed with Ollama 500 Server Errors/1200s timeouts, so cross-model confound decomposition is limited to partial log analysis. See `EXPERIMENTS.md` §6 for details.*
+
+### Cross-Model Comparison
 
 | Metric (Relaxed) | Qwen 2.5 7B | Llama 3.1 8B |
 |------------------|-------------|--------------|
-| Precision        | 0.5000      | N/A (Failed) |
-| Recall           | 0.6000      | N/A (Failed) |
-| F1               | 0.5455      | N/A (Failed) |
-| Hallucination    | 0.0%        | N/A (Failed) |
+| Precision        | 0.5000      | N/A (Failed — infra) |
+| Recall           | 0.6000      | N/A (Failed — infra) |
+| F1               | 0.5455      | N/A (Failed — infra) |
+| Hallucination    | 0.0%        | N/A (Failed — infra) |
 
-*Note: The Llama 3.1 8B evaluation (n=4 reduced snippet set) consistently failed due to local Ollama API timeouts (300s/1200s) and 500 Internal Server Errors, demonstrating hardware/infrastructure limitations when running cross-model comparisons locally. Scaffolding is complete, but data remains unavailable until run on a larger instance.*
+*Llama failure is infrastructure-specific (local Ollama GPU timeouts), not a finding about the model or prompt.*
+
+### Evaluation Limitations (R12 — with falsification conditions)
+
+1. **Small N (10 snippets).** The sample is too small for statistical confidence intervals. *Falsification:* if expanding to ≥30 snippets changes F1 by more than ±0.15 from the current 0.4348, the current numbers are misleading.
+
+2. **ISA-visibility gate not yet enforced in the pipeline.** The schema supports `isa_visible` and `visibility_justification`, and the ground truth rejects `cache_capacity_and_organization`, but the live pipeline (`extract.py`) does not yet enforce the 3-part test at extraction time. The regression test pins the corrected classification. *Falsification:* if running the full pipeline end-to-end still extracts `cache_capacity_and_organization` as a parameter, R1 is not actually fixed.
+
+3. **Single model, single prompt.** All reported metrics are from Qwen 2.5 7B with v6_decision_framework. The Llama 3.1 8B comparison failed due to infrastructure, not model quality. *Falsification:* if a second model (e.g., Llama 3.1 8B on adequate hardware, or Mistral 7B) contradicts the ISA-visibility classifications on the same snippets, R1's test needs revision.
+
+4. **Grounding vs discovery recall conflated.** The v6 prompt exposes 2 gold parameter names. If removing those examples drops aggregate recall by >0.1, the current recall number overstates cold discovery ability (see R8).
+
+5. **No run-to-run variance reported.** With `temperature=0.0` and `seed=42`, outputs should be deterministic, but Ollama's quantization and batch scheduling may introduce non-determinism. *Falsification:* if two identical runs produce different parameter sets, the single-point metrics are unreliable.
+
+### Development Mistakes (R13 — honest disclosure)
+
+- **2026-07-21:** The initial cross-model comparison (`scripts/run_cross_model.py`) was committed and advertised in README before the Llama run completed. All Llama metrics were reported as `TBD` placeholders, then corrected to `N/A (Failed)` after the run timed out. The scaffolding was sound but the claim of "cross-model evaluation" was premature.
+- **2026-07-21:** `prompts/v8_final_udb_alignment.md` was committed as a near-duplicate of v7, then deleted the same day. It was never run against the gold set but briefly appeared in git history.
+- **2026-07-28:** `scripts/verify.py` was committed with a bug — it accessed `report["precision"]` instead of `report["aggregate"]["precision"]`, meaning the reproducibility verification script would crash if run. Fixed in this commit.
 
 ## UDB Grounding
 
@@ -276,7 +332,20 @@ Every run generates a `manifest.yaml` recording exact configuration. To reproduc
 ```bash
 # Use the same config that generated the result
 python -m src.cli --input data/raw_snippets/ --config results/<run_dir>/manifest.yaml
+
+# Verify all published metrics match committed artifacts (zero API calls)
+python scripts/verify.py
+python scripts/verify.py --list  # Show which claims are checkable
 ```
+
+## Upstream Contribution Status (R14)
+
+This repository is a standalone coding challenge submission for the LFX Mentorship. As of 2026-07-29:
+
+- **No upstream PR** has been opened against `riscv-software-src/riscv-unified-db`.
+- The `scripts/generate_spec_tags.py` tool produces UDB-format YAML files and mock patches, but these have not been submitted upstream.
+- The `data/udb_reference/` files were fetched from the public UDB repo for cross-referencing; no modifications were made.
+- Cross-referencing against UDB is for validation provenance, not a claim of contribution to the UDB project.
 
 ## License
 

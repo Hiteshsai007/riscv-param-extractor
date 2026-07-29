@@ -28,10 +28,12 @@ from schema.parameter_schema import (
     CandidateSentence,
     ExtractionResult,
     Parameter,
+    RejectedCandidate,
 )
 from src.candidate_detector import detect_candidates
 from src.llm_client import GenerationConfig, LLMClient, LLMResponse
 from src.prompt_manager import get_formatted_prompt
+from src.validate_yaml import validate_evidence_heuristics
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +69,12 @@ def _create_client_from_config(config: dict[str, Any]) -> LLMClient:
     )
 
 
-def _parse_yaml_from_response(response_text: str) -> list[dict[str, Any]]:
+def _parse_yaml_from_response(response_text: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Extract and parse YAML from the LLM response.
 
     The LLM may wrap YAML in markdown code fences or include preamble text.
-    This function handles both cases.
+    This function handles both cases and extracts parameters and rejections.
     """
     # Try to extract YAML from markdown code fences
     yaml_match = re.search(
@@ -88,7 +90,7 @@ def _parse_yaml_from_response(response_text: str) -> list[dict[str, Any]]:
         yaml_text = response_text.strip()
 
     if not yaml_text or yaml_text.lower() in ("none", "null", "[]", "no parameters found"):
-        return []
+        return [], []
 
     try:
         parsed = yaml.safe_load(yaml_text)
@@ -96,14 +98,27 @@ def _parse_yaml_from_response(response_text: str) -> list[dict[str, Any]]:
         logger.warning("YAML parse error: %s", e)
         raise ValueError(f"Failed to parse YAML from LLM response: {e}") from e
 
-    # Normalize to list
+    # Normalize to tuple of (params, rejections)
     if parsed is None:
-        return []
+        return [], []
     if isinstance(parsed, dict):
+        # Support if the prompt returns a dict with 'parameters' and 'rejected_candidates'
+        if "parameters" in parsed or "rejected_candidates" in parsed:
+            return (
+                parsed.get("parameters") or [],
+                parsed.get("rejected_candidates") or []
+            )
         # Single parameter returned as dict
-        return [parsed]
+        return [parsed], []
     if isinstance(parsed, list):
-        return parsed
+        params = []
+        rejections = []
+        for item in parsed:
+            if "candidate_text" in item and "reason" in item:
+                rejections.append(item)
+            else:
+                params.append(item)
+        return params, rejections
 
     raise ValueError(f"Unexpected YAML structure: {type(parsed)}")
 
@@ -178,6 +193,7 @@ def extract_from_snippet(
     # Call LLM with retry logic
     raw_response: LLMResponse | None = None
     parsed_params: list[dict[str, Any]] = []
+    parsed_rejections: list[dict[str, Any]] = []
     last_error: str = ""
 
     for attempt in range(max_retries + 1):
@@ -194,7 +210,7 @@ def extract_from_snippet(
 
             logger.debug("Raw LLM response:\n%s", raw_response.content)
 
-            parsed_params = _parse_yaml_from_response(raw_response.content)
+            parsed_params, parsed_rejections = _parse_yaml_from_response(raw_response.content)
             break  # Success — exit retry loop
 
         except (ValueError, yaml.YAMLError) as e:
@@ -219,7 +235,7 @@ def extract_from_snippet(
                 time.sleep(retry_delay)
             continue
 
-    if not parsed_params and last_error:
+    if not parsed_params and not parsed_rejections and last_error:
         logger.error(
             "All %d attempts failed for '%s'. Last error: %s",
             max_retries + 1,
@@ -252,6 +268,11 @@ def extract_from_snippet(
             # Evidence grounding check (the critical anti-hallucination gate)
             if _validate_evidence(param, snippet_text):
                 validated_params.append(param)
+                
+                # R3: Secondary heuristic checks (ellipses, mid-clause)
+                heuristics_warnings = validate_evidence_heuristics(param.evidence, snippet_text)
+                for warning in heuristics_warnings:
+                    hallucination_flags.append(f"HEURISTIC_WARNING: Parameter '{param.name}' — {warning}")
             else:
                 hallucination_flags.append(
                     f"EVIDENCE_MISMATCH: Parameter '{param.name}' — "
@@ -274,9 +295,21 @@ def extract_from_snippet(
                 f"SCHEMA_INVALID: {param_name} — {e}"
             )
 
+    # Validate and populate rejected candidates
+    validated_rejections: list[RejectedCandidate] = []
+    for rej_dict in parsed_rejections:
+        try:
+            if not isinstance(rej_dict, dict):
+                continue
+            validated_rejections.append(RejectedCandidate(**rej_dict))
+        except Exception as e:
+            cand_text = rej_dict.get("candidate_text", "UNKNOWN") if isinstance(rej_dict, dict) else "UNKNOWN"
+            logger.warning("Schema validation failed for rejected candidate: %s — Error: %s", cand_text, e)
+
     logger.info(
-        "Extraction complete: %d validated, %d hallucination flags",
+        "Extraction complete: %d validated, %d rejections, %d hallucination flags",
         len(validated_params),
+        len(validated_rejections),
         len(hallucination_flags),
     )
 
@@ -286,7 +319,7 @@ def extract_from_snippet(
         candidates_found=len(candidates),
         parameters_extracted=len(validated_params),
         parameters=validated_params,
-        rejected_candidates=[],
+        rejected_candidates=validated_rejections,
         hallucination_flags=hallucination_flags,
     )
 

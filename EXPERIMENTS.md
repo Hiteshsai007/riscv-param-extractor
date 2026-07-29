@@ -140,6 +140,24 @@ Highest Recall (0.5000) and F1 (0.4348) so far. `wlrl_field_behavior.txt` was pe
 
 ---
 
+## Run-to-Run Variance (R7)
+
+**Observation:** The two closest available runs are Run 4 (v5, `run_20260717_052939`) and Run 5 (v6, `run_20260717_053803`), executed back-to-back on the same day with **identical model** (Qwen 2.5 7B), **identical temperature** (0.0), and **identical seed** (42). They differ only in prompt version.
+
+| Metric | Run 4 (v5) | Run 5 (v6) | Delta |
+|--------|-----------|-----------|-------|
+| Precision | 0.4000 | 0.3846 | -0.0154 |
+| Recall | 0.4000 | 0.5000 | +0.1000 |
+| F1 | 0.4000 | 0.4348 | +0.0348 |
+| Hallucination | 0.0% | 0.0% | 0 |
+| Total extracted | 10 | 13 | +3 |
+
+**Honest limitation:** This is NOT a true run-to-run variance check (which requires two runs of *identical* config). These runs used different prompts, so the delta includes prompt effects. A true variance check requires re-running Run 5 identically and comparing. With `temperature=0.0` and `seed=42`, outputs *should* be deterministic — but Ollama's quantization and batch scheduling may introduce non-determinism that this comparison cannot isolate.
+
+**What this does show:** The pipeline produces stable hallucination rate (0.0%) and stable YAML validity (100%) across prompt versions, suggesting the mechanical validation layer (verbatim evidence check + Pydantic schema) is robust regardless of prompt choice.
+
+---
+
 ## Final Analysis: Engineering Discussion
 
 ### 1. Why certain parameters are difficult to extract
