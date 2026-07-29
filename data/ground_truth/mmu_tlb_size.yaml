@@ -1,0 +1,11 @@
+snippet_file: data/raw_snippets/mmu_tlb_size.txt
+source_section: Privileged Spec, TLB
+expected_parameters: []
+expected_rejections:
+- candidate_text: The size and associativity of the Translation Lookaside Buffer (TLB)
+  reason: NOT_ISA_VISIBLE
+  isa_visible: false
+  visibility_justification: TLB size is a microarchitectural detail that affects performance,
+    but does not alter the functional behavior of any RISC-V instruction like SFENCE.VMA
+    or memory loads.
+  rationale: Microarchitectural detail.

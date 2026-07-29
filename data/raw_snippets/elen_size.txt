@@ -1,0 +1,2 @@
+# Source: Vector Extension Spec
+The maximum element length ELEN is an implementation-specific power of two.

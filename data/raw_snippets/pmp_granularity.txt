@@ -1,0 +1,2 @@
+# Source: Privileged Spec, PMP
+The PMP granularity (G) is implementation-specific, but must be a power of two greater than or equal to 4 bytes.

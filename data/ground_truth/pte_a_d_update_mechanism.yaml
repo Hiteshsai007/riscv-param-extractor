@@ -1,0 +1,11 @@
+snippet_file: data/raw_snippets/pte_a_d_update_mechanism.txt
+source_section: Privileged Spec, Virtual Memory
+expected_parameters:
+- name: pte_a_d_update_mechanism
+  type: enumerated
+  isa_visible: true
+  visibility_justification: Software can observe whether a store instruction (e.g.
+    SC.W) to an unaccessed page completes successfully (hardware update) or raises
+    a page fault exception.
+  rationale: This fundamentally alters OS page table management flow.
+expected_rejections: []

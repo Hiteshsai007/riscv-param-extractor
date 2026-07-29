@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/nmi_cause_update.txt
+source_section: Privileged Spec, Interrupts
+expected_parameters:
+- name: nmi_cause_update
+  type: boolean
+  isa_visible: true
+  visibility_justification: Software NMI handlers read MCAUSE to determine the source,
+    and will see either the NMI code or the previous exception code.
+  rationale: Affects state visible in NMI handler.
+expected_rejections: []

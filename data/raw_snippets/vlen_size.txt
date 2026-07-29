@@ -1,0 +1,2 @@
+# Source: Vector Extension Spec
+The vector length VLEN is an implementation-specific power of two, representing the number of bits in a single vector register.

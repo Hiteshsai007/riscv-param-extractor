@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/mconfigptr_presence.txt
+source_section: Privileged Spec, Configuration
+expected_parameters:
+- name: mconfigptr_presence
+  type: boolean
+  isa_visible: true
+  visibility_justification: Software can read the MCONFIGPTR CSR; if unimplemented,
+    it raises an illegal instruction exception.
+  rationale: Presence of a structural CSR.
+expected_rejections: []

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Machine IDs
+The mimpid CSR contains an implementation ID, reflecting the version of the microarchitecture.

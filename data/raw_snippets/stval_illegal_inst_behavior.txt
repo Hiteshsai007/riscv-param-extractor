@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Exceptions
+When an illegal instruction exception occurs, implementations may optionally set stval to the instruction that caused the trap.

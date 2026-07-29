@@ -1,0 +1,11 @@
+snippet_file: data/raw_snippets/asid_width.txt
+source_section: Privileged Spec, SATP
+expected_parameters:
+- name: asid_width
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: Software can determine the ASID width by writing all ones
+    to the ASID field of SATP and reading back the value.
+  rationale: The number of supported ASID bits is a classic implementation-defined
+    hardware parameter.
+expected_rejections: []

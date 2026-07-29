@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/stval_illegal_inst_behavior.txt
+source_section: Privileged Spec, Exceptions
+expected_parameters:
+- name: stval_illegal_inst_behavior
+  type: boolean
+  isa_visible: true
+  visibility_justification: Software trap handlers read the STVAL CSR to determine
+    if the faulting instruction was provided.
+  rationale: Implementation choice on whether to provide debug info.
+expected_rejections: []

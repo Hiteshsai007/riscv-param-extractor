@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/elen_size.txt
+source_section: Vector Extension Spec
+expected_parameters:
+- name: elen_size
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: Software can attempt to configure elements up to ELEN
+    using VSETVLI; unsupported element widths will trap or be rejected.
+  rationale: ELEN limits the datatypes that can be processed.
+expected_rejections: []

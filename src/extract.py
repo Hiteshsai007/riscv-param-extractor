@@ -92,34 +92,41 @@ def _parse_yaml_from_response(response_text: str) -> tuple[list[dict[str, Any]],
     The LLM may wrap YAML in markdown code fences or include preamble text.
     This function handles both cases and extracts parameters and rejections.
     """
-    # Try to extract YAML from markdown code fences
-    # 1. Strip out thought process completely
-    cleaned = re.sub(r'<thought_process>.*?</thought_process>', '', response_text, flags=re.DOTALL)
+    # The LLM frequently fails to wrap its thought process in XML tags, or breaks fences.
+    # We want to extract ONLY the YAML array.
+    # YAML arrays either start with `- name:` or are exactly `[]`.
     
-    # 2. Extract lines that are between ``` and ```, or starting with '- name:'
-    lines = cleaned.splitlines()
-    in_block = False
+    # Fast path for empty array (no parameters found)
+    just_brackets = re.sub(r'```(?:yaml|YAML)?|```|\s+', '', response_text)
+    if just_brackets.endswith("[]") or "[]" in response_text:
+        # If it generated [] at the end or clearly output no parameters
+        # we still need to be careful if it actually generated parameters AND [] (unlikely)
+        if "- name:" not in response_text:
+            return [], []
+
+    # Find where the actual YAML items begin
+    lines = response_text.splitlines()
     yaml_lines = []
+    in_yaml = False
     
     for line in lines:
         stripped = line.strip()
-        # Toggle block mode when encountering ``` (yaml or not)
-        if stripped.startswith('```'):
-            in_block = not in_block
-            continue
         
-        if in_block:
-            yaml_lines.append(line)
-        elif stripped.startswith('- name:') or stripped.startswith('- candidate_text:'):
-            # If the LLM forgot to open a block, assume we are inside one now
-            in_block = True
+        # Start capturing when we see the first YAML list item
+        if stripped.startswith("- name:") or stripped.startswith("- candidate_text:"):
+            in_yaml = True
+            
+        # Stop capturing if we hit a closing fence after starting
+        if in_yaml and stripped == "```":
+            break
+            
+        if in_yaml:
             yaml_lines.append(line)
 
     yaml_text = "\n".join(yaml_lines).strip()
     
     if not yaml_text:
-        # Fallback if no blocks found at all
-        yaml_text = cleaned.strip()
+        return [], []
 
     if not yaml_text or yaml_text.lower() in ("none", "null", "[]", "no parameters found"):
         return [], []

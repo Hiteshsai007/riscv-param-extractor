@@ -1,0 +1,9 @@
+snippet_file: data/raw_snippets/mimpid_value.txt
+source_section: Privileged Spec, Machine IDs
+expected_parameters:
+- name: mimpid_value
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: Software reads the MIMPID CSR directly.
+  rationale: Standard ID register.
+expected_rejections: []

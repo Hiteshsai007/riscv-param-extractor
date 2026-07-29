@@ -1,0 +1,2 @@
+# Source: Privileged Spec, MISA
+Whether the misa CSR is writable is implementation-specific. If writable, software can enable or disable extensions dynamically.

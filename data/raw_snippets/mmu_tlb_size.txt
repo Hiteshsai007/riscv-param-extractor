@@ -1,0 +1,2 @@
+# Source: Privileged Spec, TLB
+The size and associativity of the Translation Lookaside Buffer (TLB) are implementation-specific details that do not affect the execution semantics of instructions.

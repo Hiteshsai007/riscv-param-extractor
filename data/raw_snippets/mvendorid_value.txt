@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Machine IDs
+The mvendorid CSR contains a JEDEC manufacturer ID, which is implementation-specific. If not implemented, it returns zero.

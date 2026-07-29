@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/misa_writability.txt
+source_section: Privileged Spec, MISA
+expected_parameters:
+- name: misa_writability
+  type: boolean
+  isa_visible: true
+  visibility_justification: Software can attempt a CSRRW instruction to MISA and observe
+    if the value changes.
+  rationale: Dynamic extension configuration is a major capability.
+expected_rejections: []

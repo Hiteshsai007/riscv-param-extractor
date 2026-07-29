@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Virtual Memory
+The mechanism for updating PTE A and D bits is implementation-specific. Implementations may choose to update them in hardware or trap to software.

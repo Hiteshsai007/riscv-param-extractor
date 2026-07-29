@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/vlen_size.txt
+source_section: Vector Extension Spec
+expected_parameters:
+- name: vlen_size
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: Software can discover VLEN by executing a vector configuration
+    instruction (VSETVLI) and reading the resulting vector length.
+  rationale: VLEN dictates the fundamental size of vector state.
+expected_rejections: []

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Configuration
+The mconfigptr CSR may optionally be implemented to provide a pointer to a configuration data structure.

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Interrupts
+Whether mcause is updated on a Non-Maskable Interrupt (NMI) is implementation-defined.

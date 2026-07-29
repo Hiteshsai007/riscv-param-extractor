@@ -1,0 +1,2 @@
+# Source: Privileged Spec, SATP
+The number of ASID bits implemented in SATP is implementation-defined, up to a maximum of 16 bits.

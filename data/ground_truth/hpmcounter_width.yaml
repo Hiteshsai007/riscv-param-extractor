@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/hpmcounter_width.txt
+source_section: Privileged Spec, Performance Counters
+expected_parameters:
+- name: hpmcounter_width
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: Software can write all-ones to a performance counter CSR
+    and read it back to determine its width.
+  rationale: Counter width affects profiling tools.
+expected_rejections: []

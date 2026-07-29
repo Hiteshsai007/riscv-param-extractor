@@ -1,0 +1,10 @@
+snippet_file: data/raw_snippets/branch_predictor_type.txt
+source_section: Privileged Spec, Branch Predictor
+expected_parameters: []
+expected_rejections:
+- candidate_text: The type of branch predictor
+  reason: NOT_ISA_VISIBLE
+  isa_visible: false
+  visibility_justification: Branch predictors affect execution speed but cannot be
+    directly observed via ISA instructions.
+  rationale: Classic microarchitectural detail.

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Branch Predictor
+The type of branch predictor used is implementation-specific. Software should not rely on any particular branch prediction algorithm.

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Performance Counters
+The width of the hardware performance counters is implementation-defined, up to 64 bits.
