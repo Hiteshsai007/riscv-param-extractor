@@ -1,0 +1,1 @@
+The number of programmable performance counters is implementation-specific, up to a maximum of 29 counters (mhpmcounter3–mhpmcounter31).

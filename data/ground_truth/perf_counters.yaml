@@ -1,0 +1,10 @@
+- name: "perf_counter_count"
+  description: "The number of programmable performance counters implemented."
+  type: "numeric_range"
+  constraints: "Up to a maximum of 29 counters"
+  evidence: "The number of programmable performance counters is implementation-specific"
+  trigger_keyword: "implementation-specific"
+  source_section: "Performance Counters"
+  confidence: "high"
+  isa_visible: true
+  visibility_justification: "Software reads these counters via CSRRS on mhpmcounter3 through mhpmcounter31."

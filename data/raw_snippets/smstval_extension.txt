@@ -1,0 +1,1 @@
+Implementations may choose to implement the Smstval extension to provide supervisor-level machine trap value information.

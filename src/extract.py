@@ -69,6 +69,18 @@ def _create_client_from_config(config: dict[str, Any]) -> LLMClient:
     )
 
 
+def enforce_isa_visibility_gate(param_dict: dict) -> tuple[bool, str | None]:
+    """
+    Returns (allowed, rejection_reason). Runs regardless of what the LLM claimed.
+    """
+    if not param_dict.get("isa_visible"):
+        return False, "NOT_ISA_VISIBLE"
+    justification = param_dict.get("visibility_justification", "")
+    if len(justification.strip()) < 20:
+        return False, "MALFORMED_EVIDENCE"  # justification too thin to be real
+    return True, None
+
+
 def _parse_yaml_from_response(response_text: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Extract and parse YAML from the LLM response.
@@ -257,11 +269,23 @@ def extract_from_snippet(
     validated_params: list[Parameter] = []
     hallucination_flags: list[str] = []
 
-    for param_dict in parsed_params:
+    for param_dict in parsed_params.copy():
         try:
             if not isinstance(param_dict, dict):
                 raise TypeError(f"Expected dict for parameter, got {type(param_dict).__name__}: {param_dict}")
                 
+            # T0.1: Enforce ISA visibility mechanically before trusting the LLM
+            is_valid, reason = enforce_isa_visibility_gate(param_dict)
+            if not is_valid:
+                # Morph this into a rejected candidate dict and skip
+                parsed_rejections.append({
+                    "candidate_text": param_dict.get("evidence", "UNKNOWN"),
+                    "reason": reason,
+                    "justification": param_dict.get("visibility_justification") or param_dict.get("description", "Automatically rejected by ISA-visibility gate.")
+                })
+                parsed_params.remove(param_dict)
+                continue
+
             # Pydantic schema validation
             param = Parameter(**param_dict)
 

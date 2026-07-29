@@ -1,0 +1,1 @@
+Hardware must initialize the core stack pointer to zero on a reset. Software should not depend on this behavior across soft reboots.

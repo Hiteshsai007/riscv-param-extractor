@@ -1,0 +1,5 @@
+# No parameters - mandatory behavior.
+rejected_candidates:
+  - candidate_text: "Hardware must initialize the core stack pointer to zero on a reset."
+    reason: "CONSTRAINT_NOT_PARAMETER"
+    justification: "Normative 'must' language means there is no implementation choice."
