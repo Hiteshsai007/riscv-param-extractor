@@ -12,13 +12,19 @@ from pathlib import Path
 
 _WORD_PATTERN = re.compile(r"\b[A-Z0-9_.]+\b")
 _INDEX_PATH = Path(__file__).resolve().parent.parent / "data" / "riscv_isa_index.json"
+_GENERIC_CATEGORIES = {"CMO"}
 
 
 def _load_isa_index() -> tuple[set[str], set[str]]:
-    """Load the checked-in instruction and CSR vocabulary."""
+    """Load the checked-in instruction and CSR vocabulary.
+
+    Excludes generic extension or category names (such as CMO) that appear
+    in index data but are not individual instruction mnemonics.
+    """
     with _INDEX_PATH.open(encoding="utf-8") as handle:
         data = json.load(handle)
-    return set(data.get("valid_instructions", [])), set(data.get("valid_csrs", []))
+    valid_instructions = set(data.get("valid_instructions", [])) - _GENERIC_CATEGORIES
+    return valid_instructions, set(data.get("valid_csrs", []))
 
 
 def justification_cites_real_mnemonic(justification: str) -> bool:
