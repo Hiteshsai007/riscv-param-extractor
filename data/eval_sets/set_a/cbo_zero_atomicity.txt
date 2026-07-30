@@ -1,0 +1,2 @@
+# Source: Unprivileged Spec, CMO §cmo — Cache-Block Zero
+Cache-block zero instructions store zeros to the set of bytes corresponding to a cache block. An implementation may update the bytes in any order and with any granularity and atomicity, including individual bytes.

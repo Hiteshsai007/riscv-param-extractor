@@ -1,0 +1,2 @@
+# Source: Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE box)
+Implementations might allow a more-privileged level to trap otherwise permitted CSR accesses by a less-privileged level to allow these accesses to be intercepted. This change should be transparent to the less-privileged software.

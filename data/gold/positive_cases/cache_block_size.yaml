@@ -1,5 +1,9 @@
 # Gold label for: cache_block_size.txt
 # Classification: POSITIVE — genuine architectural parameter
+# Revision (2026-07-30, Hardening Pass 2 / P0.1): moved cache_capacity_and_organization
+# from expected_parameters → rejected_candidates (NOT_ISA_VISIBLE), aligning with R1 doctrine
+# and data/ground_truth/cache_block_size.yaml. Pre-correction snapshot archived at
+# data/gold/archive/pre_r1_fix/cache_block_size.yaml for historical metric re-derivation.
 
 snippet_file: data/raw_snippets/cache_block_size.txt
 source_section: "Unprivileged Spec, CMO §cmo"
@@ -12,12 +16,15 @@ expected_parameters:
     trigger_keyword: "implementation-specific"
     source_section: "Unprivileged Spec, CMO §cmo"
     confidence: "high"
+rejected_candidates:
   - name: "cache_capacity_and_organization"
-    description: "The capacity and organization of a cache, which varies across implementations."
-    type: "enumerated"
-    constraints: null
-    evidence: "The capacity and organization of a cache and the size of a cache block are both implementation-specific"
-    trigger_keyword: "implementation-specific"
-    source_section: "Unprivileged Spec, CMO §cmo"
-    confidence: "high"
-notes: "This is the canonical positive example from the challenge. Two parameters: cache block size and cache capacity/organization."
+    candidate_text: "The capacity and organization of a cache"
+    reason: "NOT_ISA_VISIBLE"
+    detail: >
+      Cache capacity and organization are microarchitectural details. No ISA-defined
+      instruction produces different specified behavior based on cache capacity or
+      internal organization (set-associativity, replacement policy, etc.).
+notes: >
+  Canonical positive example for the ISA-visibility gate (R1). Only cache_block_size
+  is expected. cache_capacity_and_organization is a rejected candidate (NOT_ISA_VISIBLE)
+  even though the source text marks it "implementation-specific".

@@ -1,0 +1,2 @@
+# Source: Unprivileged Spec, CMO §cmo — Breakpoint Exceptions
+Unless otherwise defined by the debug architecture specification, the behavior of trigger modules with respect to CMO instructions is UNSPECIFIED. Memory accesses may be considered to be loads or stores depending on the implementation, i.e. whether an address trigger matches on these instructions when mcontrol6[load]=1 or mcontrol6[store]=1 is implementation-specific.

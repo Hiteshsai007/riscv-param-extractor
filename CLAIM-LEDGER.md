@@ -6,13 +6,14 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 
 | Claim | Reported Value | Source File | Verification Command |
 |-------|---------------|-------------|---------------------|
-| **Precision (Strict)** | 0.3846 | `results/run_20260717_053803/*.yaml` vs `data/gold/` | `python scripts/verify.py` |
-| **Recall (Strict)** | 0.5000 | `results/run_20260717_053803/*.yaml` vs `data/gold/` | `python scripts/verify.py` |
-| **F1 (Strict)** | 0.4348 | `results/run_20260717_053803/*.yaml` vs `data/gold/` | `python scripts/verify.py` |
-| **Precision (Relaxed)** | 0.5000 | Same source, `src/eval_harness.py:compute_precision_recall_relaxed` | `python scripts/verify.py` (partial) |
-| **Recall (Relaxed)** | 0.6000 | Same source | `python scripts/verify.py` (partial) |
-| **F1 (Relaxed)** | 0.5455 | Same source | `python scripts/verify.py` (partial) |
-| **Hallucination Rate** | 0.0% | `src/validate_yaml.py:validate_evidence_grounding` | `python scripts/verify.py` |
+| **Precision (Strict)** — historical Run 5 | 0.3846 | `results/run_20260717_053803/*.yaml` vs gold with `data/gold/archive/pre_r1_fix/cache_block_size.yaml` overlay | `python scripts/verify.py` |
+| **Recall (Strict)** — historical Run 5 | 0.5000 | Same (pre-R1 archived gold) | `python scripts/verify.py` |
+| **F1 (Strict)** — historical Run 5 | 0.4348 | Same (pre-R1 archived gold) | `python scripts/verify.py` |
+| **Precision (Relaxed)** — historical | 0.5000 | Same source, `src/eval_harness.py:compute_precision_recall_relaxed` | `python scripts/verify.py` (partial) |
+| **Recall (Relaxed)** — historical | 0.6000 | Same source | `python scripts/verify.py` (partial) |
+| **F1 (Relaxed)** — historical | 0.5455 | Same source | `python scripts/verify.py` (partial) |
+| **Hallucination Rate** — historical | 0.0% | `src/validate_yaml.py:validate_evidence_grounding` | `python scripts/verify.py` |
+| **Gold R1 correction (P0.1)** | `cache_capacity_and_organization` → `rejected_candidates` / `NOT_ISA_VISIBLE` | Live: `data/gold/positive_cases/cache_block_size.yaml`; archive: `data/gold/archive/pre_r1_fix/` | `python scripts/verify.py` (prints F1 delta on Run 5 artifacts) |
 | **YAML Validity** | 100% | `src/validate_yaml.py:validate_parameter_schema` | `python scripts/verify.py` |
 | **Ground truth precommitted** | Yes | `data/ground_truth/*.yaml` | `python scripts/check_commit_order.py` |
 | **Unit test suite** | 46/46 pass (re-run 2026-07-30) | `tests/` incl. `tests/test_isa_verification.py` (5 gate/verifier tests) | `python3 -m pytest tests/ -v` |
@@ -36,7 +37,7 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 
 5. **Relaxed matching inflates precision/recall.** The relaxed metric uses `SequenceMatcher ≥ 0.75`, which can credit near-misses. The exact-match and relaxed-match numbers are reported side by side (R9) so the reader can judge the gap.
 
-6. **Set-A graded gold still contains a pre-R1 label (found 2026-07-30, Open).** `data/gold/positive_cases/cache_block_size.yaml` expects `cache_capacity_and_organization` as a valid parameter, contradicting R1 doctrine (it must be rejected as `NOT_ISA_VISIBLE`). The published 10-snippet metrics were graded against this label. It is intentionally left unchanged until the first live run over the expanded corpus, at which point the gold must be corrected, the corpus re-run, and the metric delta disclosed — changing it earlier would make `scripts/verify.py` unable to re-derive the published numbers.
+6. **Set-A gold R1 contradiction is FIXED (P0.1, 2026-07-30).** Live grading gold (`data/gold/positive_cases/cache_block_size.yaml`) now places `cache_capacity_and_organization` in `rejected_candidates` with reason `NOT_ISA_VISIBLE`. The pre-correction file is retained at `data/gold/archive/pre_r1_fix/cache_block_size.yaml`. `scripts/verify.py` re-derives historical Run 5 numbers (P 0.3846 / R 0.5000 / F1 0.4348) against that archive overlay, and prints the informational F1 delta when the same Run 5 artifacts are scored under corrected gold. Primary published metrics remain the historical Run 5 figures until a live unified-gate run is committed (P0.2).
 
 7. **The expanded 30-snippet corpus is NOT yet evaluated.** As of 2026-07-30: 30 snippets ↔ 30 preregistered GT files ↔ 30 gold labels (24 positive / 6 negative), all committed before any pipeline run on Sets B–D. No precision/recall/F1 number exists for the expanded corpus; the ±0.15 falsification condition on the 0.4348 F1 remains untested until a live run completes.
 
@@ -45,11 +46,13 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 ```
 Raw snippets (data/raw_snippets/*.txt)
     → Pipeline extraction (src/extract.py + LLM)
-        → Result YAMLs (results/run_20260717_053803/*.yaml)
+        → Result YAMLs (results/run_20260717_053803/*.yaml)          [historical]
+        → Result YAMLs (results/run_<live>/)                         [post-gate; P0.2+]
             → Evaluation harness (src/eval_harness.py)
-                → compare against gold labels (data/gold/)
+                → historical: gold with archive/pre_r1_fix overlay
+                → live:       current data/gold/ (R1-corrected)
                     → precision, recall, F1, hallucination rate
-                        → reported in README.md
+                        → reported in README.md + CLAIM-LEDGER.md
                             → verified by scripts/verify.py
 ```
 
