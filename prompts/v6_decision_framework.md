@@ -54,6 +54,9 @@ The `evidence` field MUST be an EXACT, VERBATIM substring of the source text. Be
 
 If you cannot find a verbatim substring, do NOT emit that parameter.
 
+## Mnemonic Citation Rule (B3)
+Cite mnemonics in **UPPERCASE** exactly as they appear in the ISA manual (e.g. CBO.ZERO, not cbo.zero or CMO.ZERO).
+
 ## Multi-Parameter Extraction
 
 A single passage often contains MULTIPLE independent parameters. Examine each candidate sentence independently. Common patterns:
@@ -116,7 +119,7 @@ Name: non_coherent_agent_cbo_mechanism (domain: non-coherent agent, specific: CB
 ```
 
 ### POSITIVE: Cache block size (ISA-visible)
-For cache-block-size candidates, cite the CMO instruction whose operation is defined over cache-block-sized granules; do not claim that cache capacity or organization is ISA-visible.
+For cache-block-size candidates, cite the **exact instruction mnemonic**, spelled exactly as in the ISA manual: CBO.ZERO, CBO.CLEAN, CBO.FLUSH, CBO.INVAL (the prefix is CBO, not CMO). Do not claim that cache capacity or organization is ISA-visible.
 ```yaml
 - name: "cache_block_size"
   type: "numeric_range"
@@ -130,6 +133,13 @@ Source text mentions "capacity and organization are implementation-specific".
 []
 ```
 Reason: No concrete instruction mnemonic (e.g. CBO.ZERO, CBO.CLEAN) is cited; generic "CMO instructions" is insufficient.
+
+### NEGATIVE: Fabricated mnemonic (explicitly invalid)
+Do NOT emit fabricated spellings such as "CMO.ZERO", "CMO.CLEAN", or any non-existent RISC-V mnemonic.
+```yaml
+[]
+```
+Reason: "CMO.ZERO" is not a valid RISC-V instruction mnemonic (correct: CBO.ZERO).
 
 ### POSITIVE: Two parameters from WLRL text
 Source: "Some read/write CSR fields specify behavior for only a subset of possible bit encodings, with other bit encodings reserved. [...] Implementations are permitted but not required to raise an illegal-instruction exception if an instruction attempts to write a non-supported value to a WLRL field."
