@@ -91,7 +91,7 @@ Name: csr_access_trap_capability (domain: CSR, specific: access trap)
   source_section: "Privileged Spec §priv-csrs"
   confidence: "high"
   isa_visible: true
-  visibility_justification: "Software can observe this trap when executing a CSR access instruction."
+  visibility_justification: "Software can observe this trap when executing a CSRRW or CSRRS instruction."
 ```
 
 ### POSITIVE: Enumerated mechanism (NOT boolean)
@@ -112,7 +112,16 @@ Name: non_coherent_agent_cbo_mechanism (domain: non-coherent agent, specific: CB
   source_section: "Unprivileged Spec, CMO §cmo"
   confidence: "high"
   isa_visible: true
-  visibility_justification: "Determines how software must interact with CBO instructions."
+  visibility_justification: "Determines how software must interact with CBO.CLEAN and CBO.INVAL instructions."
+```
+
+### POSITIVE: Cache block size (ISA-visible)
+For cache-block-size candidates, cite the CMO instruction whose operation is defined over cache-block-sized granules; do not claim that cache capacity or organization is ISA-visible.
+```yaml
+- name: "cache_block_size"
+  type: "numeric_range"
+  isa_visible: true
+  visibility_justification: "CBO.ZERO and CBO.CLEAN operate on cache-block-sized granules, so the block size affects the address range of each instruction."
 ```
 
 ### POSITIVE: Two parameters from WLRL text
@@ -140,7 +149,7 @@ Name: wlrl_illegal_write_exception
   source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
   confidence: "high"
   isa_visible: true
-  visibility_justification: "Software can read back the CSR to see which written values stick."
+  visibility_justification: "Software can read back the CSR with CSRRS to see which written values stick."
 - name: "wlrl_illegal_write_exception"
   description: "Whether the implementation raises an illegal-instruction exception when software writes a non-supported value to a WLRL field."
   type: "boolean"
@@ -150,7 +159,7 @@ Name: wlrl_illegal_write_exception
   source_section: "Privileged Spec, CSR Field Specifications §priv-csrs"
   confidence: "high"
   isa_visible: true
-  visibility_justification: "Software writing an unsupported value will either trap or proceed."
+  visibility_justification: "Software writing an unsupported value with CSRRW will either trap or proceed."
 ```
 
 ### NEGATIVE: WPRI — mandatory, NOT a parameter

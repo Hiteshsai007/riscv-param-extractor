@@ -34,6 +34,7 @@ from src.candidate_detector import detect_candidates
 from src.llm_client import GenerationConfig, LLMClient, LLMResponse
 from src.prompt_manager import get_formatted_prompt
 from src.validate_yaml import validate_evidence_heuristics
+from src.isa_verification import justification_cites_real_mnemonic
 
 logger = logging.getLogger(__name__)
 
@@ -73,15 +74,17 @@ def enforce_isa_visibility_gate(param_dict: dict) -> tuple[bool, str | None]:
     """
     Returns (allowed, rejection_reason). Runs regardless of what the LLM claimed.
     """
-    if "isa_visible" not in param_dict:
-        return False, "MISSING_ISA_VISIBILITY_FIELD"
-        
-    if not param_dict.get("isa_visible"):
+    # All failures intentionally collapse to NOT_ISA_VISIBLE: an item is not
+    # admissible unless the model both claims visibility and supplies a
+    # substantive, independently verifiable ISA citation.
+    if param_dict.get("isa_visible") is not True:
         return False, "NOT_ISA_VISIBLE"
-        
+
     justification = param_dict.get("visibility_justification", "")
     if len(justification.strip()) < 20:
-        return False, "MALFORMED_EVIDENCE"  # justification too thin to be real
+        return False, "NOT_ISA_VISIBLE"
+    if not justification_cites_real_mnemonic(justification):
+        return False, "NOT_ISA_VISIBLE"
     return True, None
 
 

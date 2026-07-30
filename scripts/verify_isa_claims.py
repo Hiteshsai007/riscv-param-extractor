@@ -1,94 +1,66 @@
 #!/usr/bin/env python3
-"""
-T1.1: Mechanically verify ISA-visibility claims.
+"""Audit ISA-visibility claims in committed extraction results.
 
-Extracts instruction/CSR mnemonics named in `visibility_justification`
-and cross-checks them against a static list of real RISC-V instructions/CSRs.
-Flags any justification that names no valid instruction/CSR.
+The matching logic is shared with the live extraction gate in
+``src.isa_verification`` so this audit cannot drift from the check that blocks
+unverifiable parameters before they are written.
 """
-import json
-import re
+
 import sys
 from pathlib import Path
+
+# Allow ``python scripts/verify_isa_claims.py`` from the repository root.
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import yaml
 
-def load_isa_index():
-    index_path = Path("data/riscv_isa_index.json")
-    if not index_path.exists():
-        print(f"Error: {index_path} not found")
-        sys.exit(1)
-    with open(index_path) as f:
-        data = json.load(f)
-    return set(data.get("valid_instructions", [])), set(data.get("valid_csrs", []))
+from src.isa_verification import justification_cites_real_mnemonic
 
-def verify_claims():
-    valid_instr, valid_csrs = load_isa_index()
+
+def verify_claims() -> None:
     results_dir = Path("results")
     if not results_dir.exists():
         print("No results directory found.")
         sys.exit(0)
 
-    errors = []
+    errors: list[str] = []
     checked = 0
-    
-    # Regex to find all words in ALL CAPS (possibly with dots or underscores)
-    word_pattern = re.compile(r'\b[A-Z0-9_\.]+\b')
 
     for run_dir in results_dir.glob("run_*"):
         for yaml_file in run_dir.glob("*.yaml"):
-            with open(yaml_file) as f:
+            with yaml_file.open(encoding="utf-8") as handle:
                 try:
-                    data = yaml.safe_load(f)
+                    data = yaml.safe_load(handle)
                 except Exception:
                     continue
-            
-            if not isinstance(data, list):
+
+            if not isinstance(data, dict):
                 continue
-            
-            for param in data:
+            for param in data.get("parameters", []):
                 if not isinstance(param, dict):
                     continue
-                
-                # Check only accepted parameters
-                if "reason" in param: # Skip rejected candidates
-                    continue
-                
-                isa_visible = param.get("isa_visible")
-                justification = param.get("visibility_justification", "")
-                
-                # If the field doesn't exist, we skip (for backwards compat with old runs)
-                # But if it exists and is True, we verify it.
-                if isa_visible is True and justification:
+                if param.get("isa_visible") is True and param.get("visibility_justification"):
                     checked += 1
-                    words = word_pattern.findall(justification)
-                    found_valid = False
-                    found_candidates = set()
-                    
-                    for w in words:
-                        if w in valid_instr or w in valid_csrs:
-                            found_valid = True
-                            break
-                        # Heuristic: if it's > 2 chars, uppercase, not in index, maybe it's a typo or un-indexed instruction
-                        if len(w) > 2 and not w.isdigit():
-                            found_candidates.add(w)
-                    
-                    if not found_valid:
+                    justification = param["visibility_justification"]
+                    if not justification_cites_real_mnemonic(justification):
                         errors.append(
-                            f"{yaml_file.name} [{run_dir.name}]: Parameter '{param.get('name')}' claims to be ISA-visible but "
-                            f"justification contains no recognizable instructions or CSRs.\n"
-                            f"  Justification: {justification}\n"
-                            f"  Unrecognized capitalized terms found: {', '.join(found_candidates) if found_candidates else 'None'}"
+                            f"{yaml_file.name} [{run_dir.name}]: Parameter "
+                            f"'{param.get('name')}' claims to be ISA-visible but "
+                            "its justification contains no recognizable instruction or CSR.\n"
+                            f"  Justification: {justification}"
                         )
-                        
+
     print(f"Checked {checked} ISA-visibility justifications.")
     if errors:
         print(f"FOUND {len(errors)} UNVERIFIABLE CLAIMS:")
-        for e in errors:
-            print(e)
+        print("\n".join(errors))
         sys.exit(1)
-    else:
-        print("All ISA-visibility claims mechanically verified against index. OK")
-        sys.exit(0)
+
+    print("All ISA-visibility claims mechanically verified against index. OK")
+    sys.exit(0)
+
 
 if __name__ == "__main__":
     verify_claims()
