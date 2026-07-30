@@ -4,7 +4,8 @@ expected_parameters:
 - name: pmp_granularity
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software writes to PMPCFG and PMPADDR CSRs and can observe
-    the granularity by checking which bits stick.
+  visibility_justification: Software writes address patterns to PMPADDR0 and observes
+    which low bits stick, with PMPCFG0 holding the region configuration; the granularity
+    bounds what memory protection software can request.
   rationale: PMP granularity dictates the minimum region size software can protect.
 expected_rejections: []

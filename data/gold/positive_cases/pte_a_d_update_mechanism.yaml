@@ -1,0 +1,16 @@
+# Gold label for: pte_a_d_update_mechanism.txt
+# Classification: POSITIVE — implementation-specific behavior mechanism
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/pte_a_d_update_mechanism.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/pte_a_d_update_mechanism.txt
+source_section: Privileged Spec, Virtual Memory
+expected_parameters:
+- name: pte_a_d_update_mechanism
+  description: Whether PTE A and D bits are updated in hardware or the access traps
+    to software.
+  type: enumerated
+  constraints: Implementations may choose to update them in hardware or trap to software.
+  evidence: The mechanism for updating PTE A and D bits is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, Virtual Memory
+  confidence: high

@@ -1,0 +1,10 @@
+# Gold label for: branch_predictor_type.txt
+# Classification: NEGATIVE — microarchitectural detail, not ISA-visible
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/branch_predictor_type.yaml),
+# BEFORE any pipeline run on this snippet.
+snippet_file: data/raw_snippets/branch_predictor_type.txt
+source_section: Privileged Spec, Branch Predictor
+expected_parameters: []
+notes: 'The predictor type is a performance-only microarchitectural choice: no instruction''s
+  specified behavior changes. Expect rejection NOT_ISA_VISIBLE. (''Software should
+  not rely...'' is also software-directed.)'

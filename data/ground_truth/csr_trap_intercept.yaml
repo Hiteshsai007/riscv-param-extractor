@@ -1,17 +1,14 @@
+# NOTE (2026-07-30): evaluated snippet — grading truth is data/gold/positive_cases/csr_trap_intercept.yaml; this file is the
+# R4 preregistration record retained for provenance.
 # Ground Truth: csr_trap_intercept.txt
 # Precommitted BEFORE any pipeline run.
-
 snippet_file: data/raw_snippets/csr_trap_intercept.txt
-source_section: "Privileged Spec §priv-csrs"
-
+source_section: Privileged Spec §priv-csrs
 expected_parameters:
-  - name: "csr_access_trap_capability"
-    type: "capability"
-    isa_visible: true
-    visibility_justification: >
-      If implemented, a CSR access by a less-privileged level that would
-      normally succeed instead traps to the more-privileged level. This
-      changes the architecturally-defined behavior of CSR read/write
-      instructions — they raise an exception instead of completing.
-
+- name: csr_access_trap_capability
+  type: capability
+  isa_visible: true
+  visibility_justification: If implemented, a CSR access instruction (CSRRS or CSRRW)
+    that would normally complete instead traps to the more-privileged level, changing
+    the architecturally-defined behavior of that instruction.
 expected_rejections: []

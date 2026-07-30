@@ -1,0 +1,15 @@
+# Gold label for: nmi_cause_update.txt
+# Classification: POSITIVE — implementation-defined trap behavior
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/nmi_cause_update.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/nmi_cause_update.txt
+source_section: Privileged Spec, Interrupts
+expected_parameters:
+- name: nmi_cause_update
+  description: Whether mcause is updated on a Non-Maskable Interrupt (NMI).
+  type: boolean
+  constraints: null
+  evidence: Whether mcause is updated on a Non-Maskable Interrupt (NMI) is implementation-defined.
+  trigger_keyword: implementation-defined
+  source_section: Privileged Spec, Interrupts
+  confidence: high

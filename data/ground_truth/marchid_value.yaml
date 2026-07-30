@@ -4,6 +4,7 @@ expected_parameters:
 - name: marchid_value
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software reads the MARCHID CSR directly.
+  visibility_justification: Software reads the MARCHID CSR directly (e.g., with CSRRS);
+    the returned microarchitecture ID is architecturally visible.
   rationale: Standard ID register.
 expected_rejections: []

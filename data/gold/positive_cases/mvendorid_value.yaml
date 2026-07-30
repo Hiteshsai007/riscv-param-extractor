@@ -1,0 +1,16 @@
+# Gold label for: mvendorid_value.txt
+# Classification: POSITIVE — implementation-specific CSR content
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/mvendorid_value.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/mvendorid_value.txt
+source_section: Privileged Spec, Machine IDs
+expected_parameters:
+- name: mvendorid_value
+  description: The JEDEC manufacturer ID returned by the mvendorid CSR (zero if unimplemented).
+  type: numeric_range
+  constraints: returns zero if not implemented
+  evidence: The mvendorid CSR contains a JEDEC manufacturer ID, which is implementation-specific.
+    If not implemented, it returns zero.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, Machine IDs
+  confidence: high

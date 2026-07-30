@@ -1,0 +1,16 @@
+# Gold label for: pmp_granularity.txt
+# Classification: POSITIVE — implementation-specific PMP constant
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/pmp_granularity.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/pmp_granularity.txt
+source_section: Privileged Spec, PMP
+expected_parameters:
+- name: pmp_granularity
+  description: The PMP granularity G (minimum protectable region size).
+  type: numeric_range
+  constraints: must be a power of two greater than or equal to 4 bytes
+  evidence: The PMP granularity (G) is implementation-specific, but must be a power
+    of two greater than or equal to 4 bytes.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, PMP
+  confidence: high

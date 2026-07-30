@@ -1,0 +1,15 @@
+# Gold label for: misa_writability.txt
+# Classification: POSITIVE — implementation-specific CSR writability
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/misa_writability.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/misa_writability.txt
+source_section: Privileged Spec, MISA
+expected_parameters:
+- name: misa_writability
+  description: Whether the misa CSR is writable.
+  type: boolean
+  constraints: If writable, software can enable or disable extensions dynamically.
+  evidence: Whether the misa CSR is writable is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, MISA
+  confidence: high

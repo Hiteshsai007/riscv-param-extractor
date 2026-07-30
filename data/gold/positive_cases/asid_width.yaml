@@ -1,0 +1,18 @@
+# Gold label for: asid_width.txt
+# Classification: POSITIVE — implementation-defined CSR field width
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/asid_width.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/asid_width.txt
+source_section: Privileged Spec, SATP
+expected_parameters:
+- name: asid_width
+  description: The number of ASID bits implemented in the satp CSR.
+  type: numeric_range
+  constraints: up to a maximum of 16 bits
+  evidence: The number of ASID bits implemented in SATP is implementation-defined,
+    up to a maximum of 16 bits.
+  trigger_keyword: implementation-defined
+  source_section: Privileged Spec, SATP
+  confidence: high
+notes: Width of the ASID field is a classic implementation-defined probeable parameter
+  (write-all-ones/read-back).

@@ -1,0 +1,16 @@
+# Gold label for: vlen_size.txt
+# Classification: POSITIVE — implementation-specific vector constant
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/vlen_size.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/vlen_size.txt
+source_section: Vector Extension Spec
+expected_parameters:
+- name: vlen_size
+  description: The number of bits in a single vector register (VLEN).
+  type: numeric_range
+  constraints: must be a power of two
+  evidence: The vector length VLEN is an implementation-specific power of two, representing
+    the number of bits in a single vector register.
+  trigger_keyword: implementation-specific
+  source_section: Vector Extension Spec
+  confidence: high

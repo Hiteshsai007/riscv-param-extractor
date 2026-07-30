@@ -1,0 +1,18 @@
+# Gold label for: smstval_extension.txt
+# Classification: POSITIVE — optional extension presence
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/smstval_extension.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/smstval_extension.txt
+source_section: Smstval Extension
+expected_parameters:
+- name: smstval_extension_supported
+  description: Whether the Smstval extension is implemented.
+  type: capability
+  constraints: null
+  evidence: Implementations may choose to implement the Smstval extension to provide
+    supervisor-level machine trap value information.
+  trigger_keyword: may
+  source_section: Smstval Extension
+  confidence: high
+notes: Snippet has no '# Source:' header. Changes stval contents on traps — ISA-visible
+  to S-mode handlers.

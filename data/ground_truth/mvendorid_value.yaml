@@ -4,6 +4,7 @@ expected_parameters:
 - name: mvendorid_value
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software reads the MVENDORID CSR directly.
+  visibility_justification: Software reads the MVENDORID CSR directly (e.g., with
+    CSRRS); the returned JEDEC manufacturer ID (or zero) is architecturally visible.
   rationale: Standard ID register.
 expected_rejections: []

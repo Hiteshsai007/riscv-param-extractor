@@ -1,5 +1,11 @@
-# No parameters - mandatory behavior.
-rejected_candidates:
-  - candidate_text: "Hardware must initialize the core stack pointer to zero on a reset."
-    reason: "CONSTRAINT_NOT_PARAMETER"
-    justification: "Normative 'must' language means there is no implementation choice."
+# NOTE (2026-07-30): format normalized to canonical expected_parameters/expected_rejections shape.
+snippet_file: data/raw_snippets/stack_pointer_reset.txt
+source_section: Reset Behavior
+expected_parameters: []
+expected_rejections:
+- candidate_text: Hardware must initialize the core stack pointer to zero on a reset.
+  reason: CONSTRAINT_NOT_PARAMETER
+  isa_visible: false
+  visibility_justification: Normative 'must' text leaves no implementation choice;
+    no instruction's specified behavior varies, so there is no ISA-visible parameter.
+  rationale: Mandatory behavior, not a parameter axis.

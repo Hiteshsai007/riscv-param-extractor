@@ -1,0 +1,20 @@
+# Gold label for: mtvec_base_alignment.txt
+# Classification: POSITIVE — WARL CSR field behavior (implementation-variable alignment)
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/mtvec_base_alignment.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/mtvec_base_alignment.txt
+source_section: Privileged Spec, Machine Trap-Vector Base-Address (mtvec)
+expected_parameters:
+- name: mtvec_base_alignment
+  description: The alignment constraint on the mtvec BASE field.
+  type: field_behavior
+  constraints: BASE must be aligned on a 4-byte boundary; MODE may impose additional
+    alignment constraints.
+  evidence: The value in the BASE field must always be aligned on a 4-byte boundary,
+    and the MODE setting may impose additional alignment constraints on the value
+    in the BASE field.
+  trigger_keyword: may impose
+  source_section: Privileged Spec, Machine Trap-Vector Base-Address (mtvec)
+  confidence: high
+notes: Mandatory 4-byte floor + implementation-variable additional constraint (WARL).
+  The parameter axis is the additional-alignment behavior, not the fixed floor.

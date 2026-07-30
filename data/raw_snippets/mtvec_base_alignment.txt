@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Machine Trap-Vector Base-Address (mtvec)
+The mtvec register is an MXLEN-bit WARL read/write register that holds trap vector configuration, consisting of a vector base address (BASE) and a vector mode (MODE). The value in the BASE field must always be aligned on a 4-byte boundary, and the MODE setting may impose additional alignment constraints on the value in the BASE field.

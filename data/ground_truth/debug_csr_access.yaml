@@ -1,3 +1,5 @@
+# NOTE (2026-07-30): evaluated snippet — grading truth is data/gold/negative_cases/debug_csr_access.yaml; this file is the
+# R4 preregistration record retained for provenance.
 # Ground Truth: debug_csr_access.txt
 # Precommitted BEFORE any pipeline run.
 

@@ -4,7 +4,8 @@ expected_parameters:
 - name: vlen_size
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software can discover VLEN by executing a vector configuration
-    instruction (VSETVLI) and reading the resulting vector length.
+  visibility_justification: Software can discover VLEN by executing the VSETVLI instruction
+    and observing the granted vector length in the VL CSR, so VLEN directly constrains
+    vector software.
   rationale: VLEN dictates the fundamental size of vector state.
 expected_rejections: []

@@ -1,0 +1,12 @@
+snippet_file: data/raw_snippets/mtvec_base_alignment.txt
+source_section: Privileged Spec, Machine Trap-Vector Base-Address (mtvec)
+expected_parameters:
+- name: mtvec_base_alignment
+  type: field_behavior
+  isa_visible: true
+  visibility_justification: The BASE and MODE fields of the MTVEC CSR are WARL with
+    implementation-chosen legal alignments; software can write MTVEC with CSRRW and
+    read back which alignment constraints hold.
+  rationale: Alignment of the trap-vector base is an implementation-variable CSR field
+    behavior.
+expected_rejections: []

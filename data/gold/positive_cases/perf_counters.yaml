@@ -1,0 +1,18 @@
+# Gold label for: perf_counters.txt
+# Classification: POSITIVE — implementation-specific counter count
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/perf_counters.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/perf_counters.txt
+source_section: Performance Counters
+expected_parameters:
+- name: perf_counter_count
+  description: The number of programmable performance counters implemented.
+  type: numeric_range
+  constraints: up to a maximum of 29 counters
+  evidence: The number of programmable performance counters is implementation-specific,
+    up to a maximum of 29 counters (mhpmcounter3–mhpmcounter31).
+  trigger_keyword: implementation-specific
+  source_section: Performance Counters
+  confidence: high
+notes: 29 programmable counters = mhpmcounter3..mhpmcounter31. Note the snippet has
+  no '# Source:' header.
