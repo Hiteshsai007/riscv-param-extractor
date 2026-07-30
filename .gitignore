@@ -20,3 +20,7 @@ results/*
 !results/run_20260730_161322/**
 !results/run_20260730_162340/
 !results/run_20260730_162340/**
+
+# Local debug clutter
+*.log
+promptsv6_*.md

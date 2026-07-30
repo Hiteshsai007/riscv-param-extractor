@@ -6,400 +6,307 @@
 [![Pydantic](https://img.shields.io/badge/Pydantic-Schema%20Validation-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
 [![Linux Foundation](https://img.shields.io/badge/LFX-Coding%20Challenge-003778)](https://lfx.linuxfoundation.org/)
 
-This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-assisted Architectural Parameter Extraction coding challenge. The objective is to extract implementation-defined architectural parameters from RISC-V ISA specification snippets using prompt-engineered large language models while ensuring deterministic validation, reproducibility, and structured YAML output.
+**LFX Mentorship Coding Challenge — Part II** · **Author:** [Hitesh](https://github.com/Hiteshsai007)
 
-**LFX Mentorship Coding Challenge — Part II**  
-**Author:** Hitesh
+Local, auditable extraction of implementation-defined RISC-V architectural parameters.
+Every bold number re-derives from committed artifacts — no API keys, no model calls.
+
+---
 
 ## Check it without trusting me
 
 ```bash
-./verify.sh
-# re-derives every published number offline, no model calls
+./verify.sh          # Linux/macOS / Git Bash
+# or:  powershell -File .\verify.ps1
 ```
 
-See [CLAIM-LEDGER.md](CLAIM-LEDGER.md) for the full claim → artifact map.
+Offline. No API keys. No model calls. Re-derives every published number from committed
+artifacts and fails if any disagree.
 
-## Challenge Deliverable Map
+| What it checks | Where |
+|----------------|-------|
+| Metrics re-derived (historical + live) | [`scripts/verify.py`](scripts/verify.py) |
+| GT predates results (R4 commit-order) | [`scripts/check_commit_order.py`](scripts/check_commit_order.py) |
+| Evidence is verbatim | [`src/validate_yaml.py`](src/validate_yaml.py) |
+| Bad fixtures fail closed | [`tests/bad_examples/`](tests/bad_examples/) |
+| Prompt does not leak gold names (discovery) | [`scripts/check_prompt_leakage.py`](scripts/check_prompt_leakage.py) |
+| Claim → artifact map | [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md) |
 
-| Challenge Requirement | Repository Location |
-|-----------------------|---------------------|
-| **1. LLM Details** | [README → Deliverable 1](#deliverable-1) |
-| **2. Prompt Files** | [prompts/](prompts/) |
-| **3. Prompt Engineering Journey** | [EXPERIMENTS.md](EXPERIMENTS.md) |
-| **4. Hallucination Mitigation** | [README → Deliverable 2](#deliverable-2) + [EXPERIMENTS.md](EXPERIMENTS.md) |
-| **5. Example YAML Outputs** | [results/](results/) / [README → Example YAML Output](#example-yaml-output) |
-| **6. Source Code** | [src/](src/) |
+---
 
-## Coding Challenge Deliverables
+## What this is (one screen)
 
+| | |
+|--|--|
+| **Input** | 30 ISA snippets — Set A (10 evaluated) + Sets B–D (20 forward-preregistered) |
+| **Output** | Structured YAML parameters + `rejected_candidates` with closed reason codes |
+| **Model** | Qwen 2.5 7B Instruct via local Ollama · `temperature=0` · `seed=42` |
+| **Gates** | Verbatim evidence · ISA-visibility (shared live/audit) · Pydantic schema · commit-order |
+| **Primary live run** | [`results/run_20260730_152612/`](results/run_20260730_152612/) — **unified ISA gate** |
+| **Historical baseline** | [`results/run_20260717_053803/`](results/run_20260717_053803/) — **predates** `isa_visible` fields |
 
-<a id="deliverable-1"></a>
-### Deliverable 1 — LLM Details
-- **Model Name:** Qwen 2.5 7B Instruct
-- **Model Version:** `qwen2.5:7b-instruct`
-- **Context Length:** 8,192 tokens
-- **Temperature:** 0.0 (Deterministic extraction)
-- **Seed:** 42
-- **Runtime:** Locally executed via Ollama engine. Run metrics (execution time) are logged automatically to console and `summary.yaml`.
+---
 
-<a id="deliverable-2"></a>
-### Deliverable 2 — Prompt Engineering Journey
-- **Prompt Engineering Journey:** Progressed from zero-shot (`v1_baseline`) to few-shot (`v2`), Chain of Thought with contrastive examples (`v4_contrastive`), and a structured Q1→Q2→Q3 Decision Framework (`v6_decision_framework`). *Note: `v6` remains the evaluated best; `v7_lfx_hardening` is currently an unevaluated draft incorporating cross-model lessons.*
-- **Prompt Refinement:** Iterations were driven by failure analysis on the gold dataset, resolving issues like type confusion (`boolean` vs `enumerated`) and multi-parameter extraction halting.
-- **Hallucination Mitigation Strategy:** A strict, deterministic hallucination validation gate is implemented in Python (`validate_yaml.py`). The LLM must output an `evidence` field, which is checked to ensure it is a verbatim, character-for-character substring of the source text. If not, it is flagged as a hallucination.
-- **Lessons Learned:** Instruction-tuned 7B models strictly require 1-shot formatting templates for Pydantic schema compliance. Explicit contrastive examples are essential for boundary detection. The complete iteration log is in `EXPERIMENTS.md`.
+## Challenge deliverable map
 
-### Deliverable 3 — Results
-- **YAML Output Format:** Validated by a strict Pydantic schema (`schema/parameter_schema.py`).
-- **Required Fields:** `name`, `description`, `type`, `constraints`, `evidence`, `trigger_keyword`, `source_section`, `confidence`.
-- **Evaluation Metrics:** Evaluated for Precision, Recall, F1, Hallucination Rate, and YAML Validity.
+| # | Challenge requirement | Proof (one click) |
+|---|----------------------|-------------------|
+| 1 | LLM details | [Deliverable 1](#deliverable-1) · [`config/default.yaml`](config/default.yaml) |
+| 2 | Prompt files | [`prompts/`](prompts/) · [`prompts/CHANGELOG.md`](prompts/CHANGELOG.md) |
+| 3 | Prompt engineering journey | [`EXPERIMENTS.md`](EXPERIMENTS.md) |
+| 4 | Hallucination mitigation | [`src/validate_yaml.py`](src/validate_yaml.py) · [Gates](#architecture) |
+| 5 | Example YAML outputs | [Results](#results-live-unified-gate) · [`results/run_20260730_152612/`](results/run_20260730_152612/) |
+| 6 | Source code | [`src/`](src/) |
 
-<a id="example-yaml-output"></a>
-# Example YAML Output
+---
 
-### Example 1 — Cache Block Specification (R1 Corrected)
+## Architecture
 
-> **Note:** Prior versions of this README extracted `cache_capacity_and_organization` as a
-> valid parameter with `confidence: high`. This was the core judgment bug identified in the
-> PRD: cache capacity/organization is an implementation-specific microarchitectural detail
-> but is NOT ISA-visible — no instruction's defined behavior depends on it. The corrected
-> output below rejects it with reason code `NOT_ISA_VISIBLE` (R1) and a justification.
+Live pipeline (also rendered: [`docs/pipeline-architecture.svg`](docs/pipeline-architecture.svg)):
 
-```yaml
-source_file: data\raw_snippets\cache_block_size.txt
-source_section: Unprivileged Spec, Cache Management Operations (CMO) §cmo
-candidates_found: 1
-parameters_extracted: 1
-parameters:
-- name: cache_block_size
-  description: The size of a cache block, which is implementation-specific.
-  type: numeric_range
-  constraints: Must be uniform throughout the system in initial CMO extensions.
-  evidence: the size of a cache block are both implementation-specific
-  trigger_keyword: implementation-specific
-  source_section: Unprivileged Spec, CMO §cmo
-  confidence: high
-  isa_visible: true
-  visibility_justification: >-
-    CMO instructions (CBO.ZERO, CBO.CLEAN, CBO.FLUSH, CBO.INVAL) operate on
-    cache-block-sized granules. The block size determines the effective address
-    range affected by a single instruction execution.
-rejected_candidates:
-- candidate_text: The capacity and organization of a cache
-  reason: NOT_ISA_VISIBLE
-  detail: >-
-    Cache capacity and organization are microarchitectural details. No ISA-defined
-    instruction produces different specified behavior based on cache capacity.
-  isa_visible: false
-  visibility_justification: >-
-    No RISC-V instruction's architecturally-defined behavior depends on cache
-    capacity or internal organization.
-hallucination_flags: []
+```mermaid
+flowchart TD
+  S[ISA snippet] --> P1[Pass 1: regex candidate detection]
+  P1 --> P2[Pass 2: LLM classify + extract]
+  P2 --> V1[Pydantic schema validation]
+  V1 --> V2[Verbatim evidence check]
+  V2 --> V3[ISA-visibility gate]
+  V3 --> OUT[Accepted params + rejected candidates YAML]
+  GT[ground_truth / gold precommitted] -.-> EVAL[eval_harness]
+  OUT --> EVAL
+  EVAL --> METRICS[P / R / F1 / hallucination]
+  METRICS --> VERIFY["./verify.sh re-derives numbers"]
 ```
 
-### Example 2 — CSR Specification
+### Commit-order integrity (R4)
+
+Ground truth and gold labels are committed **before** any pipeline results on the same snippets.
+`scripts/check_commit_order.py` enforces this mechanically.
+
+```mermaid
+flowchart LR
+  A[Commit snippets] --> B[Commit ground_truth + gold]
+  B --> C[Run extract.py + live ISA gate]
+  C --> D[Commit results/run_*]
+  D --> E[eval_harness vs gold]
+  E --> F["./verify.sh"]
+  B -.->|must predate| D
+```
+
+| Gate | What it blocks | Shared code |
+|------|----------------|-------------|
+| Pass 1 regex | Non-trigger sentences never reach the LLM | [`src/candidate_detector.py`](src/candidate_detector.py) |
+| Verbatim evidence | Paraphrased / fabricated quotes | [`src/validate_yaml.py`](src/validate_yaml.py) |
+| ISA-visibility | Microarchitectural “implementation-specific” noise | [`src/isa_verification.py`](src/isa_verification.py) — used by **both** `extract.py` and `scripts/verify_isa_claims.py` |
+| Pydantic schema | Missing fields / illegal types | [`schema/parameter_schema.py`](schema/parameter_schema.py) |
+| Commit-order | Post-hoc label editing after seeing outputs | [`scripts/check_commit_order.py`](scripts/check_commit_order.py) |
+
+---
+
+## Results (live unified gate)
+
+**Source of truth for live numbers:** [`results/run_20260730_152612/`](results/run_20260730_152612/)
+(`v6_decision_framework`, seed=42, temp=0, **current ISA-visibility gate**).
+
+**Historical Run 5** ([`results/run_20260717_053803/`](results/run_20260717_053803/)) **predates** the unified gate
+(`isa_visible` absent in those YAMLs). It remains re-derivable via archived pre-R1 gold —
+see [CLAIM-LEDGER.md](CLAIM-LEDGER.md).
+
+### Live corpus (exact match)
+
+| Slice | Precision | Recall | F1 | Hallucination |
+|-------|-----------|--------|-----|---------------|
+| Full corpus (30) | 0.5000 | 0.1154 | 0.1875 | 0.0% |
+| Set A only (10) | 1.0000 | 0.3333 | 0.5000 | 0.0% |
+| Sets B–D (first forward-registered eval) | 0.0000 | 0.0000 | 0.0000 | 0.0% |
+
+Re-derive: `python scripts/verify.py` · slice breakdown:
+`python scripts/compute_eval_breakdown.py --results results/run_20260730_152612`
+
+> **Falsification triggered:** live full-corpus F1 (0.1875) differs from historical Set-A F1 (0.4348)
+> by more than ±0.15. Set-A-only historical numbers do **not** generalize to the expanded corpus.
+
+### Historical Run 5 (exact vs relaxed)
+
+Graded against **pre-R1 archived gold** (`data/gold/archive/pre_r1_fix/`).
+
+| Metric | Exact Match | Relaxed (≥0.75 name sim) | Delta |
+|--------|-------------|--------------------------|-------|
+| **Precision** | 0.3846 | 0.5000 | +0.1154 |
+| **Recall** | 0.5000 | 0.6000 | +0.1000 |
+| **F1 Score** | 0.4348 | 0.5455 | +0.1107 |
+| **Hallucination** | 0.0% | 0.0% | — |
+
+### Grounding vs discovery recall (Set A)
+
+| Recall type | Prompt | Run | Strict recall |
+|-------------|--------|-----|---------------|
+| **Grounding** (gold names in prompt) | [`v6_decision_framework`](prompts/v6_decision_framework.md) | [`run_20260730_160338`](results/run_20260730_160338/) | **0.4444** |
+| **Discovery** (zero eval gold names) | [`v8_discovery`](prompts/v8_discovery.md) | [`run_20260730_162340`](results/run_20260730_162340/) | **0.0000** |
+
+Discovery exact-match is zero because the model reused illustrative off-evaluation example
+names (`legal_encoding_subset`, `privileged_csr_intercept`) — naming contamination, not empty extraction.
+See [CLAIM-LEDGER.md](CLAIM-LEDGER.md) claim 8.
+
+### Run-to-run variance (identical config)
+
+Same prompt (`v6`), seed=42, temperature=0, Set A, twice:
+
+| Run | P | R | F1 |
+|-----|---|---|-----|
+| [`run_20260730_160338`](results/run_20260730_160338/) | 1.0000 | 0.4444 | 0.6154 |
+| [`run_20260730_161322`](results/run_20260730_161322/) | 1.0000 | 0.4444 | 0.6154 |
+| **Delta** | **0** | **0** | **0** |
+
+### Accepted parameter (live)
+
+From [`results/run_20260730_152612/wlrl_field_behavior.yaml`](results/run_20260730_152612/wlrl_field_behavior.yaml):
+
 ```yaml
-source_file: data\raw_snippets\wlrl_field_behavior.txt
-source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WLRL
-candidates_found: 3
-parameters_extracted: 2
-parameters:
 - name: wlrl_supported_values
-  description: WLRL CSR fields specify behavior for only a subset of possible bit
-    encodings, with the implementation defining which values are legal.
   type: field_behavior
-  constraints: Software should not write illegal values.
   evidence: Some read/write CSR fields specify behavior for only a subset of possible
-    bit encodings, with other bit encodings reserved. Software should not write anything
-    other than legal values to such a field, and should not assume a read will return
-    a legal value unless the last write was of a legal value, or the register has
-    not been written since another operation (e.g., reset) set the register to a legal
-    value.
-  trigger_keyword: WLRL
-  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
-  confidence: high
-- name: wlrl_illegal_write_exception
-  description: Whether the implementation raises an illegal-instruction exception
-    when software writes a non-supported value to a WLRL field.
-  type: boolean
-  constraints: Permitted but not required — implementation choice.
-  evidence: Implementations are permitted but not required to raise an illegal-instruction
-    exception if an instruction attempts to write a non-supported value to a WLRL
-    field.
-  trigger_keyword: permitted but not required
-  source_section: Privileged Spec, CSR Field Specifications §priv-csrs
-  confidence: high
-rejected_candidates:
-- candidate_text: Software should not write anything other than legal values to such a field
-  reason: CONSTRAINT_NOT_PARAMETER
-  detail: >-
-    This is a normative requirement directed at software ("should not"), not a
-    hardware variability axis. The hardware behavior is defined by the WLRL
-    field specification itself.
-hallucination_flags: []
+    bit encodings, with other bit encodings reserved. ...
+  isa_visible: true
+  visibility_justification: Software can read back the CSR with CSRRS to see which
+    written values stick.
 ```
 
+### Rejected candidate (live) — reason code
+
+From [`results/run_20260730_152612/cache_block_size.yaml`](results/run_20260730_152612/cache_block_size.yaml)
+— both candidates rejected; true-positive `cache_block_size` was **not** recovered:
+
+```yaml
+rejected_candidates:
+- candidate_text: The capacity and organization of a cache and the size of a cache
+    block are both implementation-specific, ...
+  reason: NOT_ISA_VISIBLE
+```
+
+Doctrine (R1): capacity/organization alone is NOT ISA-visible. Live gold places it in
+`rejected_candidates` ([`data/gold/positive_cases/cache_block_size.yaml`](data/gold/positive_cases/cache_block_size.yaml));
+pre-correction snapshot archived at [`data/gold/archive/pre_r1_fix/`](data/gold/archive/pre_r1_fix/).
+
 ---
 
-These examples are actual outputs generated by the extraction pipeline.
+## Three findings worth your time
 
-All outputs are automatically validated against the project's Pydantic schema before being written to disk.
+1. **Mechanical gate catches what a length-only check would accept.**
+   A fabricated “cache capacity is ISA-visible” justification with no real mnemonic
+   used to pass a length-only gate. Now `justification_cites_real_mnemonic` is shared by
+   the live extractor and the offline auditor —
+   [`src/isa_verification.py`](src/isa_verification.py),
+   [`scripts/verify_isa_claims.py`](scripts/verify_isa_claims.py).
 
-Each extracted parameter includes a verbatim evidence field that must exactly match text from the original specification, providing a deterministic safeguard against hallucinations.
+2. **ISA-index vocabulary bug would have silently failed 12/18 forward GT labels.**
+   Justifications cited real mnemonics (VSETVLI, MARCHID, PMPCFG, …) absent from the
+   checked-in index. Fixed *before* any live run on Sets B–D —
+   [`data/riscv_isa_index.json`](data/riscv_isa_index.json),
+   [`ground_truth.md`](ground_truth.md).
 
-Invalid YAML or unsupported fields are automatically rejected and regenerated before being accepted.
+3. **Strict gate + discovery naming are the honesty story, not the high score.**
+   Live full-corpus F1 is 0.1875; discovery exact-match recall is 0.0000.
+   Numbers and non-claims are mapped in [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md).
+   No multi-model success claim; no upstream UDB PR
+   ([`results/udb/README.md`](results/udb/README.md)).
 
 ---
-
-## Verification & Auditability
-
-Run ./verify.sh — every published number re-derives from committed artifacts.
-
-This repository now carries the audit trail needed for offline review:
-- [ground_truth.md](ground_truth.md) — pre-committed evaluation ledger with expected parameters and rejection reasons.
-- [verify.sh](verify.sh) — re-derives numeric claims from committed results and gold files, then re-runs the offline validator.
-- [src/validate.py](src/validate.py) — fail-closed validator for schema, evidence grounding, ISA visibility justifications, and rejection reason codes.
-- [CLAIM-LEDGER.md](CLAIM-LEDGER.md) — maps every quantitative claim in this README to the result file and script that produce it.
 
 ## Quick Start
 
 ```bash
-# 1. Clone and install
-git clone <repo-url>
+git clone https://github.com/Hiteshsai007/riscv-param-extractor.git
 cd riscv-param-extractor
 pip install -r requirements.txt
 
-# 2. Verify schema and tests pass
+# 1. Offline audit first (no model)
+./verify.sh                 # or: powershell -File .\verify.ps1
 python -m pytest tests/ -v
 
-# 3. Check LLM connectivity (requires Ollama running)
+# 2. Model-dependent steps (requires local Ollama + qwen2.5:7b-instruct)
 python -m src.cli --health-check --config config/default.yaml
-
-# 4. Run extraction on example snippets
 python -m src.cli --input data/raw_snippets/ --config config/default.yaml
-
-# 5. Evaluate results against gold labels
 python -m src.eval_harness --results results/<run_dir>/ --gold data/gold/ --snippets data/raw_snippets/
 ```
 
-## Architecture
+Discovery-prompt eval (zero gold names): `--config config/discovery.yaml`.
 
-```
-Input Snippet → [Pass 1: Regex Candidate Detection] → Candidate Sentences
-                                                            ↓
-                                                    [Pass 2: LLM Classification + Extraction]
-                                                            ↓
-                                                    [Schema Validation (Pydantic)]
-                                                            ↓
-                                                    [Evidence Grounding Check (verbatim substring)]
-                                                            ↓
-                                                    Validated Parameters (YAML)
-```
+---
 
-### Two-Pass Pipeline
+<a id="deliverable-1"></a>
+## Deliverable 1 — LLM details
 
-- **Pass 1 (Deterministic):** Regex-based trigger keyword matching identifies candidate sentences. No LLM call — fully reproducible, free to run.
-- **Pass 2 (LLM):** Each candidate is classified as `parameter | software_permission | mandatory_behavior | structural_convention | architectural_constant`. Only genuine parameters are extracted as structured YAML.
+| Field | Value |
+|-------|-------|
+| Model | Qwen 2.5 7B Instruct (`qwen2.5:7b-instruct`) |
+| Context | 8,192 tokens |
+| Temperature | 0.0 |
+| Seed | 42 |
+| Runtime | Local Ollama (`http://localhost:11434`) |
+| Config | [`config/default.yaml`](config/default.yaml) |
 
-### Deterministic Hallucination Validation
+<a id="deliverable-2"></a>
+## Deliverable 2 — Prompt journey & hallucination mitigation
 
-1. **Verbatim evidence check:** Every parameter's `evidence` field must be an exact substring of the source text. Deterministic — no LLM judgment needed.
-2. **ISA-visibility gate:** Before schema acceptance, `extract.py` requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic. The matching function in `src/isa_verification.py` is shared with `scripts/verify_isa_claims.py`, so the live gate and post-run audit use one rule.
-3. **Schema validation:** 100% of outputs must pass Pydantic validation.
-4. **Retry logic:** Malformed LLM output triggers retry (configurable, default 2).
+Prompt path: `v1` → `v4` contrastive CoT → **`v6_decision_framework`** (evaluated best) →
+`v8_discovery` (zero gold names, P1.1). Full log: [`EXPERIMENTS.md`](EXPERIMENTS.md).
 
-## Project Structure
+Hallucination gate: every `evidence` field must be a **verbatim substring** of the source
+snippet ([`src/validate_yaml.py`](src/validate_yaml.py)). Failures are recorded as
+`hallucination_flags` / rejections — not silently accepted.
+
+---
+
+## Project structure
 
 ```
 riscv-param-extractor/
-├── README.md
-├── EXPERIMENTS.md              # Prompt iteration log with metrics
-├── requirements.txt
-├── config/
-│   ├── default.yaml            # Generation params, model config
-│   └── models/                 # Per-model configs
-├── prompts/
-│   ├── v1_baseline.md          # Current prompt version
-│   └── CHANGELOG.md            # Prompt version history
-├── schema/
-│   └── parameter_schema.py     # Pydantic models (source of truth)
-├── src/
-│   ├── cli.py                  # CLI entry point
-│   ├── extract.py              # Main pipeline orchestrator
-│   ├── candidate_detector.py   # Pass 1: deterministic regex
-│   ├── llm_client.py           # LLM abstraction (Ollama + API)
-│   ├── prompt_manager.py       # Prompt loading and formatting
-│   ├── validate_yaml.py        # Schema + evidence validation
-│   └── eval_harness.py         # Precision/recall/hallucination metrics
+├── CLAIM-LEDGER.md          # every bold metric → artifact
+├── EXPERIMENTS.md           # prompt iteration log
+├── ground_truth.md          # Set A–D corpus ledger (R4)
+├── verify.sh / verify.ps1   # offline mentor-grade checks
+├── config/                  # default.yaml, discovery.yaml, models/
 ├── data/
-│   ├── raw_snippets/           # Text from ISA manual chapters
-│   └── gold/                   # Hand-labeled expected outputs
-│       ├── positive_cases/
-│       └── negative_cases/
-├── results/                    # Pipeline output (per-run directories)
-└── tests/
-    ├── test_schema.py
-    └── test_evidence.py
+│   ├── raw_snippets/        # 30 ISA snippets
+│   ├── ground_truth/        # R4 preregistration (30)
+│   ├── gold/                # grading labels (+ archive/pre_r1_fix/)
+│   ├── eval_sets/set_a/     # Set A slice for variance / discovery
+│   ├── udb_reference/       # vendored UDB shapes
+│   └── riscv_isa_index.json # mnemonic vocabulary for the gate
+├── docs/pipeline-architecture.svg
+├── prompts/                 # v1…v8 + CHANGELOG
+├── results/
+│   ├── run_20260717_053803/ # historical (pre-gate fields)
+│   ├── run_20260730_152612/ # live unified-gate full corpus
+│   ├── run_20260730_160338/ # Set A variance #1
+│   ├── run_20260730_161322/ # Set A variance #2 (ΔF1=0)
+│   ├── run_20260730_162340/ # discovery prompt
+│   └── udb/                 # UDB-shaped exports (no upstream PR)
+├── schema/parameter_schema.py
+├── scripts/                 # verify, commit-order, leakage, breakdown…
+├── src/                     # extract, validate, eval_harness, isa_verification
+└── tests/                   # unit + tests/bad_examples/
 ```
 
-## Evaluation Metrics (Historical Run 5: `v6_decision_framework`)
+---
 
-Evaluated on Set A — 10 annotated snippets (7 positive, 3 negative). Graded against the **pre-R1** gold snapshot archived at `data/gold/archive/pre_r1_fix/` (live gold was corrected in P0.1; see CLAIM-LEDGER). Re-derive with `python scripts/verify.py`.
+## Claims NOT being made
 
-### Decomposed Match Credit (R9)
+See the full list in [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md). Short version:
 
-| Metric | Exact Match | Relaxed Match (≥0.75) | Delta | Notes |
-|--------|-------------|----------------------|-------|-------|
-| **Precision** | 0.3846 | 0.5000 | +0.1154 | 3 matches gained by relaxed name similarity |
-| **Recall** | 0.5000 | 0.6000 | +0.1000 | |
-| **F1 Score** | 0.4348 | 0.5455 | +0.1107 | |
-| **Hallucination Rate** | 0.0% | 0.0% | — | 100% of evidence fields are verbatim substrings |
-| **YAML Validity** | 100% | 100% | — | |
+| Tempting claim | Reality |
+|----------------|---------|
+| “Discovery recall = reported recall” | Only `v8_discovery` measures cold naming; v6 embeds gold names |
+| “Multi-model success” | No second model has committed post-gate artifacts |
+| “Upstream UDB contribution” | Format samples only; **no PR opened** |
+| “Historical F1 generalizes” | Falsified by live 30-snippet F1 = 0.1875 |
 
-**Exact match** = both parameter `name` and `type` are identical strings. **Relaxed match** = `difflib.SequenceMatcher` ratio ≥ 0.75 on normalized names + exact `type` match. See `src/eval_harness.py` for implementation.
+Arena/sandbox Ollama remains environment-blocked (no binary / registries / RAM).
+Live numbers above were produced on a machine with local Ollama and committed as artifacts.
 
-## Evaluation Metrics (Live Unified Gate — Hardening Pass 2)
-
-Artifacts: `results/run_20260730_152612/` (full 30, prompt `v6_decision_framework`, seed=42, temp=0, live ISA-visibility gate). Graded against **current** R1-corrected gold. Re-derive: `python scripts/compute_eval_breakdown.py --results results/run_20260730_152612`.
-
-| Slice | **Precision** | **Recall** | **F1 Score** | **Hallucination Rate** | Notes |
-|-------|---------------|------------|--------------|------------------------|-------|
-| Full corpus (30) | 0.5000 | 0.1154 | 0.1875 | 0.0% | ±0.15 falsification vs historical 0.4348 **triggered** |
-| Set A only (10) | 1.0000 | 0.3333 | 0.5000 | 0.0% | Same gate; gold denominator 9 after P0.1 |
-| Sets B–D (20) | 0.0000 | 0.0000 | 0.0000 | 0.0% | **First evaluation of forward-registered set** |
-
-Gold-correction delta on historical Run 5 artifacts (informational): F1 0.4348 → 0.4545 when scored under corrected gold (`scripts/verify.py`).
-
-### Grounding vs Discovery Recall (P1.1)
-
-| Recall Type | Prompt | Run | Set A Recall (strict) |
-|-------------|--------|-----|------------------------|
-| Grounding (gold names present) | `v6_decision_framework` | `results/run_20260730_160338` | **0.4444** (full Set A) / **0.6000** on name-leaked subset |
-| Discovery (gold names absent) | `v8_discovery` | `results/run_20260730_162340` | **0.0000** |
-
-Discovery extracted the right *concepts* on WLRL/CSR-trap snippets but emitted illustrative off-evaluation example names (`legal_encoding_subset`, `privileged_csr_intercept`) — exact-match recall is therefore zero. Documented in CLAIM-LEDGER / EXPERIMENTS.
-
-### Run-to-run Variance (P1.2)
-
-Identical config (`v6`, seed=42, temp=0) on Set A, two committed runs:
-
-| Run | P | R | F1 |
-|-----|---|---|-----|
-| `results/run_20260730_160338` | 1.0000 | 0.4444 | 0.6154 |
-| `results/run_20260730_161322` | 1.0000 | 0.4444 | 0.6154 |
-| **Delta** | **0** | **0** | **0** |
-
-Per-snippet parameter-name sets were identical. Under this config, single-run figures are repeatable on Set A (delta zero).
-
-### Recall Type Disclosure (R8)
-
-The v6 prompt includes one contrastive positive example (cache_block_size) and one negative example (WPRI) in the system prompt. The gold parameter *names* are embedded in these examples. This means the reported recall for cache_block_size and WPRI snippets measures **grounding recall** (matching against a catalogue the model has seen), not **cold discovery recall** (finding parameters the model has never been told about). For the remaining 8 snippets, no gold names appear in the prompt — those measure genuine discovery recall.
-
-| Recall Type | Snippets (n) | Recall |
-|-------------|-------------|--------|
-| Grounding (gold names in prompt) | Set A / name-leaked subset | **0.4444 / 0.6000** (live v6 Set A — see table above) |
-| Discovery (no gold names in prompt) | Set A via `v8_discovery` | **0.0000** (exact match; see P1.1 note) |
-| **Aggregate historical (Run 5)** | **10** | **0.5000 (strict) / 0.6000 (relaxed)** |
-
-*Live numbers separate grounding vs discovery. Historical aggregate still conflates them.*
-
-### Confound Reporting (R10)
-
-| Failure class | Status | Resolution |
-|--------------|--------|------------|
-| Parser leak (`<thought_process>` text breaking YAML capture) | **Resolved — 2026-07-30** | The parser now isolates the YAML list after leaked reasoning text. |
-| Silent field-absence rejection (`isa_visible` omitted) | **Resolved — 2026-07-30** | The v6 prompt requires the field, and the gate rejects any missing/non-true value as `NOT_ISA_VISIBLE`. |
-| Hallucinated self-certification (long justification with no real ISA name) | **Resolved — 2026-07-30** | `enforce_isa_visibility_gate` and `scripts/verify_isa_claims.py` now share `justification_cites_real_mnemonic`, backed by `data/riscv_isa_index.json`. |
-| **Live gate bypass on generic justification (NEW — 2026-07-30)** | **Open** | Two independent live runs on `cache_block_size.txt` produced `cache_capacity_and_organization` with a generic justification. `cache_block_size` never appeared. |
-| Missing live-run artifacts for `run_20260730_113320` | **Superseded — Hardening Pass 2** | Historical claim remains documentation-only. **New** committed live trees: `results/run_20260730_152612` (full 30), `160338`/`161322` (Set A variance), `162340` (discovery). |
-| **Grading gold contradicts R1 doctrine for `cache_block_size` (found 2026-07-30)** | **Resolved — P0.1, 2026-07-30** | Live gold puts `cache_capacity_and_organization` in `rejected_candidates` / `NOT_ISA_VISIBLE`. Archive at `data/gold/archive/pre_r1_fix/`. |
-| Live acceptance re-test of the strict CMO rule (2026-07-30, arena sandbox) | **Blocked in arena; live-validated on maintainer machine (2026-07-30)** | Arena: no Ollama / registries / RAM. Local: Ollama `qwen2.5:7b-instruct` produced committed `isa_visible` artifacts. `cache_block_size` live extraction still yields 0 accepted params (both candidates `NOT_ISA_VISIBLE`) — gate fires; model does not recover the true positive. |
-| **ISA-index vocabulary gap → systematic false rejections at scale (found 2026-07-30)** | **Resolved — pre-registration fix, 2026-07-30** | Offline audit of all ground-truth files found **12 of 18 forward-registered `isa_visible: true` justifications could never pass the shared mnemonic check**: they cite real RISC-V names (VSETVLI, MARCHID, MIMPID, MVENDORID, MHPMCOUNTER3, PMPCFG/PMPADDR) absent from the checked-in index (44 instructions / 40 CSRs — no vector, ID, PMP, or counter CSRs). Over the expanded corpus, the live gate would have rejected correct parameters regardless of model quality — a reference-vocabulary bug masquerading as a model failure. Fixed *before any live run*: `data/riscv_isa_index.json` expanded to 48 instructions / 267 CSRs (real mnemonics only; CMO remains excluded) and the 12 GT justifications rewritten to cite indexed mnemonics, names/types unchanged. Published metrics unaffected (grading is by `data/gold` name+type on the 10-snippet evaluated set only). |
-
-The origin story took three iterations to close: first the parser leak was fixed, then the missing-field rejection was made explicit, and finally the live gate was unified with the verifier after a fabricated cache-capacity justification passed the length-only gate. These are closed failure modes, not remaining caveats; the historical runs above remain evidence of how they were found."
-
-### Cross-Model Comparison
-
-| Metric (Relaxed) | Qwen 2.5 7B | Llama 3.1 8B |
-|------------------|-------------|--------------|
-| Precision        | 0.0000      | 0.0000 |
-| Recall           | 0.0000      | 0.0000 |
-| F1               | 0.0000      | 0.0000 |
-| Hallucination    | 0.0%        | 0.0% |
-
-*The latest run for cross-model evaluation showed catastrophic format instruction breakdown on both models when using the v6 prompt. Neither model was able to extract parameters because the CoT text leaked into the YAML tags, producing 0% recall across the board. See Confound Reporting above.*
-
-### Evaluation Limitations (R12 — with falsification conditions)
-
-1. **Small N (10 snippets) — falsified.** Expanding to 30 snippets changed live F1 from historical 0.4348 to **0.1875** (Δ > 0.15). Historical Set-A F1 does not generalize; Sets B–D first-eval F1 = 0.0000.
-
-2. **Grounding vs discovery — now separated (P1.1).** Discovery (`v8`) Set A exact-match recall = 0.0000 vs grounding Set A 0.4444 (Δ > 0.1). Historical aggregate overstated cold discovery.
-
-3. **Run-to-run variance measured (P1.2).** Two identical Set A runs (`160338` vs `161322`) → ΔP=ΔR=ΔF1=0. Under this config, single-run Set A figures are repeatable.
-
-### Development Mistakes (R13 — honest disclosure)
-
-- **2026-07-21:** The initial cross-model comparison (`scripts/run_cross_model.py`) was committed and advertised in README before the Llama run completed. All Llama metrics were reported as `TBD` placeholders, then corrected to `N/A (Failed)` after the run timed out. The scaffolding was sound but the claim of "cross-model evaluation" was premature.
-- **2026-07-21:** `prompts/v8_final_udb_alignment.md` was committed as a near-duplicate of v7, then deleted the same day. It was never run against the gold set but briefly appeared in git history.
-- **2026-07-28:** `scripts/verify.py` was committed with a bug — it accessed `report["precision"]` instead of `report["aggregate"]["precision"]`, meaning the reproducibility verification script would crash if run. Fixed in this commit.
-
-## UDB Grounding
-
-The `data/gold/` set has been cross-referenced against actual [RISC-V Unified Database (UDB)](https://github.com/riscv-software-src/riscv-unified-db) parameter entries. This provides real-world provenance for the extraction targets. See `data/udb_reference/README.md` and `data/gold/udb_crossref.yaml` for details.
-
-## Configuration
-
-All generation parameters are externalized in `config/default.yaml`:
-
-| Parameter | Default | Rationale |
-|-----------|---------|-----------|
-| temperature | 0.0 | Extraction is retrieval, not creative generation |
-| seed | 42 | Fixed for reproducibility |
-| max_tokens | 4096 | Sized for schema × ~10 candidates |
-| top_p | 1.0 | Irrelevant at temperature=0 |
-| repetition_penalty | 1.0 | No penalty — technical terms must not be distorted |
-
-## Models
-
-| Model | Role | Config |
-|-------|------|--------|
-| Qwen 2.5 7B Instruct | Primary | `config/models/qwen2_5.yaml` |
-| Llama 3.1 8B Instruct | Alternative Evaluation Model | `config/models/llama3_1.yaml` |
-
-**Inference framework:** Ollama (local). Install from [https://ollama.com](https://ollama.com).
-
-```bash
-# Pull models
-ollama pull qwen2.5:7b-instruct
-ollama pull llama3.1:8b-instruct-q4_K_M
-```
-
-- Therefore, the reported metrics are highly conservative.
-- This design was intentionally chosen to guarantee reproducibility and deterministic evaluation without relying on a subjective LLM judge.
-
-## Reproducing Results
-
-Every run generates a `manifest.yaml` recording exact configuration. To reproduce:
-
-```bash
-# Use the same config that generated the result
-python -m src.cli --input data/raw_snippets/ --config results/<run_dir>/manifest.yaml
-
-# Verify all published metrics match committed artifacts (zero API calls)
-python scripts/verify.py
-python scripts/verify.py --list  # Show which claims are checkable
-```
-
-## Upstream Contribution Status (R14)
-
-This repository is a standalone coding challenge submission for the LFX Mentorship. As of 2026-07-29:
-
-- **No upstream PR** has been opened against `riscv-software-src/riscv-unified-db`.
-- The `scripts/generate_spec_tags.py` tool produces UDB-format YAML files and mock patches, but these have not been submitted upstream.
-- The `data/udb_reference/` files were fetched from the public UDB repo for cross-referencing; no modifications were made.
-- Cross-referencing against UDB is for validation provenance, not a claim of contribution to the UDB project.
+---
 
 ## License
 
-Apache 2.0
+Apache License 2.0

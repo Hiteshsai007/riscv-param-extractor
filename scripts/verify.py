@@ -141,7 +141,8 @@ def extract_live_reported_metrics(readme_path: Path) -> dict[str, float | None]:
     """Extract full-corpus live metrics from README Live Unified Gate table if present."""
     content = readme_path.read_text(encoding="utf-8")
     live_section = re.search(
-        r"## Evaluation Metrics \(Live Unified Gate.*?\)(.*?)(?=\n## |\Z)",
+        r"## (?:Results \(live unified gate\)|Evaluation Metrics \(Live Unified Gate.*?\))."
+        r"*(.*?)(?=\n## |\Z)",
         content,
         re.DOTALL,
     )
@@ -237,7 +238,10 @@ def do_verify() -> None:
     live_results = LIVE_RESULTS
     readme_text = readme_path.read_text(encoding="utf-8")
     has_live_readme_table = bool(
-        re.search(r"## Evaluation Metrics \(Live Unified Gate", readme_text)
+        re.search(
+            r"## (?:Results \(live unified gate\)|Evaluation Metrics \(Live Unified Gate)",
+            readme_text,
+        )
     )
 
     if live_results is None and has_live_readme_table:
