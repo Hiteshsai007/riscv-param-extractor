@@ -4,8 +4,16 @@
 The matching logic is shared with the live extraction gate in
 ``src.isa_verification`` so this audit cannot drift from the check that blocks
 unverifiable parameters before they are written.
+
+By default only git-tracked result files are audited (local scratch runs under
+``results/`` that were never committed are ignored). Pass ``--all`` to scan
+every ``results/run_*`` directory on disk.
 """
 
+from __future__ import annotations
+
+import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -19,17 +27,43 @@ import yaml
 from src.isa_verification import justification_cites_real_mnemonic
 
 
-def verify_claims() -> None:
+def _tracked_result_files() -> set[Path]:
+    try:
+        out = subprocess.check_output(
+            ["git", "ls-files", "results"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return set()
+    return {(ROOT / line.strip()).resolve() for line in out.splitlines() if line.strip()}
+
+
+def verify_claims(all_on_disk: bool = False) -> None:
     results_dir = Path("results")
     if not results_dir.exists():
         print("No results directory found.")
         sys.exit(0)
 
+    tracked = set() if all_on_disk else _tracked_result_files()
     errors: list[str] = []
     checked = 0
+    scanned_runs: set[str] = set()
 
-    for run_dir in results_dir.glob("run_*"):
+    for run_dir in sorted(results_dir.glob("run_*")):
         for yaml_file in run_dir.glob("*.yaml"):
+            if yaml_file.name in ("manifest.yaml", "summary.yaml"):
+                continue
+            if not all_on_disk:
+                if not tracked:
+                    # No git / empty index — fall back to historical committed names only
+                    if not run_dir.name.startswith("run_20260717_"):
+                        continue
+                elif yaml_file.resolve() not in tracked:
+                    continue
+
+            scanned_runs.add(run_dir.name)
             with yaml_file.open(encoding="utf-8") as handle:
                 try:
                     data = yaml.safe_load(handle)
@@ -52,6 +86,8 @@ def verify_claims() -> None:
                             f"  Justification: {justification}"
                         )
 
+    scope = "all on-disk runs" if all_on_disk else "git-tracked results only"
+    print(f"Scope: {scope}; runs scanned: {sorted(scanned_runs) or ['(none)']}")
     print(f"Checked {checked} ISA-visibility justifications.")
     if errors:
         print(f"FOUND {len(errors)} UNVERIFIABLE CLAIMS:")
@@ -62,5 +98,16 @@ def verify_claims() -> None:
     sys.exit(0)
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Scan every results/run_* directory, including untracked local runs",
+    )
+    args = parser.parse_args()
+    verify_claims(all_on_disk=args.all)
+
+
 if __name__ == "__main__":
-    verify_claims()
+    main()

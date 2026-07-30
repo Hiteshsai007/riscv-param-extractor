@@ -1,0 +1,15 @@
+---
+
+$schema: param_schema.json#
+kind: parameter
+name: SATP_ASID_BITS
+description: 'The number of ASID bits implemented in SATP, which can vary between
+  implementations up to a maximum of 16 bits.
+
+  '
+long_name: Satp Asid Bits
+schema:
+  type: integer
+definedBy:
+  extension:
+    name: TODO_EXTENSION_NAME
