@@ -1,0 +1,9 @@
+# Gold label for: mmu_tlb_size.txt
+# Classification: NEGATIVE — microarchitectural detail, not ISA-visible
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/mmu_tlb_size.yaml),
+# BEFORE any pipeline run on this snippet.
+snippet_file: data/raw_snippets/mmu_tlb_size.txt
+source_section: Privileged Spec, TLB
+expected_parameters: []
+notes: Snippet itself says TLB size/associativity 'do not affect the execution semantics
+  of instructions'. Expect rejection NOT_ISA_VISIBLE.

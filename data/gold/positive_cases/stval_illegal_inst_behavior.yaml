@@ -1,0 +1,17 @@
+# Gold label for: stval_illegal_inst_behavior.txt
+# Classification: POSITIVE — optional trap value behavior
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/stval_illegal_inst_behavior.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/stval_illegal_inst_behavior.txt
+source_section: Privileged Spec, Exceptions
+expected_parameters:
+- name: stval_illegal_inst_behavior
+  description: Whether stval is set to the faulting instruction on an illegal-instruction
+    exception.
+  type: boolean
+  constraints: null
+  evidence: implementations may optionally set stval to the instruction that caused
+    the trap
+  trigger_keyword: may
+  source_section: Privileged Spec, Exceptions
+  confidence: high

@@ -1,0 +1,16 @@
+# Gold label for: elen_size.txt
+# Classification: POSITIVE — implementation-specific vector constant
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/elen_size.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/elen_size.txt
+source_section: Vector Extension Spec
+expected_parameters:
+- name: elen_size
+  description: The maximum element length (ELEN) supported by the vector extension.
+  type: numeric_range
+  constraints: must be a power of two
+  evidence: The maximum element length ELEN is an implementation-specific power of
+    two.
+  trigger_keyword: implementation-specific
+  source_section: Vector Extension Spec
+  confidence: high

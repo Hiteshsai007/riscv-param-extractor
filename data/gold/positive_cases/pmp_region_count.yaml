@@ -1,0 +1,16 @@
+# Gold label for: pmp_region_count.txt
+# Classification: POSITIVE — implementation-defined hardware count
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/pmp_region_count.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/pmp_region_count.txt
+source_section: Privileged Spec, Physical Memory Protection
+expected_parameters:
+- name: pmp_region_count
+  description: The number of implemented PMP entries.
+  type: numeric_range
+  constraints: the architecture supports up to 64 PMP entries
+  evidence: The number of implemented PMP entries is implementation-defined, and software
+    can determine it by probing the pmpaddr CSRs.
+  trigger_keyword: implementation-defined
+  source_section: Privileged Spec, Physical Memory Protection
+  confidence: high

@@ -1,3 +1,5 @@
+# NOTE (2026-07-30): evaluated snippet — grading truth is data/gold/positive_cases/cache_block_size.yaml; this file is the
+# R4 preregistration record retained for provenance.
 # Ground Truth: cache_block_size.txt
 # Precommitted BEFORE any pipeline run. Classification decisions justified below.
 #

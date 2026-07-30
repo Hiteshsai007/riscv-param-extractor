@@ -1,0 +1,16 @@
+# Gold label for: hpmcounter_width.txt
+# Classification: POSITIVE — implementation-defined CSR width
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/hpmcounter_width.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/hpmcounter_width.txt
+source_section: Privileged Spec, Performance Counters
+expected_parameters:
+- name: hpmcounter_width
+  description: The bit width of the hardware performance counters.
+  type: numeric_range
+  constraints: up to 64 bits
+  evidence: The width of the hardware performance counters is implementation-defined,
+    up to 64 bits.
+  trigger_keyword: implementation-defined
+  source_section: Privileged Spec, Performance Counters
+  confidence: high

@@ -1,17 +1,16 @@
+# NOTE (2026-07-30): evaluated snippet — grading truth is data/gold/positive_cases/cmo_trigger_behavior.yaml; this file is the
+# R4 preregistration record retained for provenance.
+# DRIFT NOTE: gold labels TWO parameters (cmo_trigger_module_behavior, cmo_trigger_match_type);
+# this preregistration expected one (cmo_load_store_mechanism). Gold is authoritative for grading.
 # Ground Truth: cmo_trigger_behavior.txt
 # Precommitted BEFORE any pipeline run.
-
 snippet_file: data/raw_snippets/cmo_trigger_behavior.txt
-source_section: "Unprivileged Spec, CMO §cmo"
-
+source_section: Unprivileged Spec, CMO §cmo
 expected_parameters:
-  - name: "cmo_load_store_mechanism"
-    type: "enumerated"
-    isa_visible: true
-    visibility_justification: >
-      How the CMO instructions interact with loads and stores is
-      implementation-specific. Software must know which mechanism
-      the hardware uses to correctly sequence CMO and data-access
-      instructions, making this ISA-visible.
-
+- name: cmo_load_store_mechanism
+  type: enumerated
+  isa_visible: true
+  visibility_justification: Whether cache-block operations (CBO.ZERO, CBO.CLEAN, CBO.FLUSH,
+    CBO.INVAL) count as loads or stores changes their architecturally-defined interaction
+    with data triggers (TSELECT/TDATA1) and with FENCE ordering.
 expected_rejections: []

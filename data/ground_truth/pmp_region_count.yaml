@@ -1,0 +1,12 @@
+snippet_file: data/raw_snippets/pmp_region_count.txt
+source_section: Privileged Spec, Physical Memory Protection
+expected_parameters:
+- name: pmp_region_count
+  type: numeric_range
+  isa_visible: true
+  visibility_justification: M-mode software determines the implemented entry count
+    by probing PMPADDR0 through PMPADDR63 and observing which writes stick; PMPCFG0
+    carries the per-entry configuration seen by software.
+  rationale: The number of implemented PMP entries is a classic implementation-defined
+    count parameter.
+expected_rejections: []

@@ -1,0 +1,2 @@
+# Source: Privileged Spec, Physical Memory Protection
+The architecture supports up to 64 PMP entries. The number of implemented PMP entries is implementation-defined, and software can determine it by probing the pmpaddr CSRs.

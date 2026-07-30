@@ -4,7 +4,8 @@ expected_parameters:
 - name: elen_size
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software can attempt to configure elements up to ELEN
-    using VSETVLI; unsupported element widths will trap or be rejected.
+  visibility_justification: Software can attempt element-width configurations with
+    the VSETVLI instruction; configurations requesting element widths beyond ELEN
+    cannot be established, so ELEN is observable to software.
   rationale: ELEN limits the datatypes that can be processed.
 expected_rejections: []

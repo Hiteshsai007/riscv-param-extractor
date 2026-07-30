@@ -1,0 +1,9 @@
+# Gold label for: stack_pointer_reset.txt
+# Classification: NEGATIVE — mandatory behavior, no variability axis
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/stack_pointer_reset.yaml),
+# BEFORE any pipeline run on this snippet.
+snippet_file: data/raw_snippets/stack_pointer_reset.txt
+source_section: Reset Behavior
+expected_parameters: []
+notes: Normative 'must' language leaves no implementation choice; the 'should not
+  depend' clause is software-directed. Expect rejection CONSTRAINT_NOT_PARAMETER.

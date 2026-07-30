@@ -1,0 +1,15 @@
+# Gold label for: marchid_value.txt
+# Classification: POSITIVE — implementation-specific CSR content
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/marchid_value.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/marchid_value.txt
+source_section: Privileged Spec, Machine IDs
+expected_parameters:
+- name: marchid_value
+  description: The microarchitecture ID value returned by the marchid CSR.
+  type: numeric_range
+  constraints: null
+  evidence: The marchid CSR contains a microarchitecture ID, which is implementation-specific.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, Machine IDs
+  confidence: high

@@ -1,0 +1,16 @@
+# Gold label for: mconfigptr_presence.txt
+# Classification: POSITIVE — optional CSR presence
+# Authored 2026-07-30 from the precommitted R4 ground truth (data/ground_truth/mconfigptr_presence.yaml),
+# BEFORE any pipeline run on this snippet. Names/types match the preregistration exactly.
+snippet_file: data/raw_snippets/mconfigptr_presence.txt
+source_section: Privileged Spec, Configuration
+expected_parameters:
+- name: mconfigptr_presence
+  description: Whether the mconfigptr CSR is implemented.
+  type: boolean
+  constraints: null
+  evidence: The mconfigptr CSR may optionally be implemented to provide a pointer
+    to a configuration data structure.
+  trigger_keyword: may
+  source_section: Privileged Spec, Configuration
+  confidence: high

@@ -4,7 +4,8 @@ expected_parameters:
 - name: hpmcounter_width
   type: numeric_range
   isa_visible: true
-  visibility_justification: Software can write all-ones to a performance counter CSR
-    and read it back to determine its width.
+  visibility_justification: Software can write all-ones to an MHPMCOUNTER3 CSR with
+    CSRRW and read it back with CSRRS; the number of bits that stick reveals the implemented
+    counter width.
   rationale: Counter width affects profiling tools.
 expected_rejections: []

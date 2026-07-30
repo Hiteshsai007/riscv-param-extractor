@@ -18,6 +18,9 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 | **Unit test suite** | 46/46 pass (re-run 2026-07-30) | `tests/` incl. `tests/test_isa_verification.py` (5 gate/verifier tests) | `python3 -m pytest tests/ -v` |
 | **ISA-claims verifier on committed runs** | Checked 0, exit 0 (2026-07-30) | `scripts/verify_isa_claims.py` over `results/run_20260717_*`; those files predate the visibility fields (grep: 0 files contain `isa_visible`) so 0 checked is expected, not a path bug | `python3 scripts/verify_isa_claims.py` |
 | **Reproducibility re-derivation** | 4/4 metrics match (2026-07-30) | `scripts/verify.py` re-computes P/R/F1/hallucination from committed YAMLs | `python3 scripts/verify.py` |
+| **Corpus 1:1:1 integrity** | 30 snippets ↔ 30 GT ↔ 30 gold (24 pos/6 neg) | `data/raw_snippets/` ↔ `data/ground_truth/` ↔ `data/gold/{positive,negative}_cases/` | `ls data/raw_snippets/*.txt data/ground_truth/*.yaml data/gold/*/*.yaml \| wc -l` |
+| **GT justifications pass shared mnemonic check** | 0 unpassable `isa_visible: true` entries (was 12/18) | `data/ground_truth/*.yaml` vs `src/isa_verification.py` + expanded `data/riscv_isa_index.json` (48 instr / 267 CSRs) | re-run the audit snippet recorded in `ground_truth.md` |
+| **Commit-order integrity (R4)** | GT predates results for all snippets | `scripts/check_commit_order.py` | `python3 scripts/check_commit_order.py` |
 
 ## Claims NOT Being Made
 
@@ -32,6 +35,10 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 4. **The ISA-visibility gate and verifier are unified (resolved 2026-07-30), but NOT live-validated with committed artifacts.** `extract.py` synchronously requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic via the shared `src/isa_verification.py` function. The verifier imports that same function. The three discovered failure modes—parser leak, silent field-absence rejection, and hallucinated self-certification—are closed at unit level (46/46 pytest, re-run 2026-07-30); the historical origin and dates are recorded in README → "Confound Reporting". As of 2026-07-30, no post-unification live-model run has committed artifacts in this repository: `run_20260730_113320` is cited in commit `4b1a063`'s message but never appears in git history (`git rev-list --all --objects | grep run_20260730` → empty), and a live re-test attempt on 2026-07-30 was environment-blocked (no Ollama binary, model registries unreachable, 3.8 GB RAM < ~4.4 GB weights). The unification commit `a75f5b7` IS an ancestor of `origin/main` (merged via PR #1); the old `arena/019fb244-*` branch was deleted after merge, and `main` is the authoritative branch going forward.
 
 5. **Relaxed matching inflates precision/recall.** The relaxed metric uses `SequenceMatcher ≥ 0.75`, which can credit near-misses. The exact-match and relaxed-match numbers are reported side by side (R9) so the reader can judge the gap.
+
+6. **Set-A graded gold still contains a pre-R1 label (found 2026-07-30, Open).** `data/gold/positive_cases/cache_block_size.yaml` expects `cache_capacity_and_organization` as a valid parameter, contradicting R1 doctrine (it must be rejected as `NOT_ISA_VISIBLE`). The published 10-snippet metrics were graded against this label. It is intentionally left unchanged until the first live run over the expanded corpus, at which point the gold must be corrected, the corpus re-run, and the metric delta disclosed — changing it earlier would make `scripts/verify.py` unable to re-derive the published numbers.
+
+7. **The expanded 30-snippet corpus is NOT yet evaluated.** As of 2026-07-30: 30 snippets ↔ 30 preregistered GT files ↔ 30 gold labels (24 positive / 6 negative), all committed before any pipeline run on Sets B–D. No precision/recall/F1 number exists for the expanded corpus; the ±0.15 falsification condition on the 0.4348 F1 remains untested until a live run completes.
 
 ## Metric Computation Chain
 

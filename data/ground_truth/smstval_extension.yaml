@@ -1,10 +1,11 @@
-- name: "smstval_extension_supported"
-  description: "Whether the Smstval extension is implemented."
-  type: "capability"
-  constraints: null
-  evidence: "Implementations may choose to implement the Smstval extension"
-  trigger_keyword: "may"
-  source_section: "Smstval Extension"
-  confidence: "high"
+# NOTE (2026-07-30): format normalized to canonical expected_parameters/expected_rejections shape.
+snippet_file: data/raw_snippets/smstval_extension.txt
+source_section: Smstval Extension
+expected_parameters:
+- name: smstval_extension_supported
+  type: capability
   isa_visible: true
-  visibility_justification: "Implementing this extension changes the trap value behavior stored in the STVAL CSR."
+  visibility_justification: Implementing Smstval changes what is written to the STVAL
+    CSR on synchronous exceptions, which supervisor trap handlers observe directly.
+  rationale: Optional extension presence is an implementation capability parameter.
+expected_rejections: []
