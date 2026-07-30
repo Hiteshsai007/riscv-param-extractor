@@ -23,7 +23,7 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 | **Run-to-run variance ΔF1 (Set A)** | 0.0000 | `results/run_20260730_160338` vs `results/run_20260730_161322` | compare summaries / breakdown |
 | **YAML Validity** | 100% | `src/validate_yaml.py:validate_parameter_schema` | `python scripts/verify.py` |
 | **Ground truth precommitted** | Yes | `data/ground_truth/*.yaml` | `python scripts/check_commit_order.py` |
-| **Unit test suite** | 46/46 pass (re-run 2026-07-30) | `tests/` incl. `tests/test_isa_verification.py` | `python -m pytest tests/ -v` |
+| **Unit test suite** | 48/48 pass | `tests/` incl. `tests/test_isa_verification.py` | `python -m pytest tests/ -v` |
 | **ISA-claims verifier** | git-tracked results only (default) | `scripts/verify_isa_claims.py` | `python scripts/verify_isa_claims.py` |
 | **Prompt leakage guard** | v8 clean; v4–v7 allowlisted grounding | `scripts/check_prompt_leakage.py` | `python scripts/check_prompt_leakage.py` |
 | **Corpus 1:1:1 integrity** | 30 snippets ↔ 30 GT ↔ 30 gold (24 pos/6 neg) | `data/raw_snippets/` ↔ `data/ground_truth/` ↔ `data/gold/{positive,negative}_cases/` | count files |

@@ -79,18 +79,18 @@ class TestISAVisibilityGate:
         )
         assert param.isa_visible is True
 
-    def test_parameter_schema_backwards_compatible(self):
-        """Parameter model should still work WITHOUT isa_visible (backwards compat)."""
-        param = Parameter(
-            name="test_param",
-            description="Test",
-            type="boolean",
-            evidence="test evidence",
-            trigger_keyword="may",
-            source_section="Test §1",
-            confidence="high",
-        )
-        assert param.isa_visible is None
+    def test_parameter_schema_requires_isa_visible(self):
+        """Hardened schema requires isa_visible (no silent omission / pre-gate compat)."""
+        with pytest.raises(Exception):
+            Parameter(
+                name="test_param",
+                description="Test",
+                type="boolean",
+                evidence="test evidence",
+                trigger_keyword="may",
+                source_section="Test §1",
+                confidence="high",
+            )
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -101,13 +101,16 @@ class TestRejectionReasonCodes:
     """Test the closed rejection reason enum and RejectedCandidate model."""
 
     def test_all_reason_codes_exist(self):
-        """All 5 defined reason codes should be in the enum."""
+        """All defined reason codes should be in the enum."""
         expected = {
             "NOT_ISA_VISIBLE",
             "CONSTRAINT_NOT_PARAMETER",
             "NOT_STATED_IN_TEXT",
             "DUPLICATE",
             "MALFORMED_EVIDENCE",
+            "SOFTWARE_PERMISSION",
+            "MANDATORY_BEHAVIOR",
+            "STRUCTURAL_CONVENTION",
         }
         actual = {r.value for r in RejectionReason}
         assert expected == actual
