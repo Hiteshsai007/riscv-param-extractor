@@ -221,3 +221,34 @@ However, prior to the timeout, partial parsing logs from the reduced set reveale
    - **Qwen 2.5 7B**: Output strictly compliant YAML array containing the `cmo_load_store_mechanism` parameter.
    - **Llama 3.1 8B**: Failed validation by outputting explanatory conversational text and markdown (`Q1: WHO has the choice? The hardware...`) outside the `<thought_process>` tags, violating the schema structure and crashing the PyYAML parser.
    - **Ground Truth**: Qwen was correct. The pipeline strictly requires raw YAML for automated CI/CD parsing.
+
+---
+
+## 7. Hardening Pass 2 — Live Unified Gate (2026-07-30)
+
+### Live full-corpus evaluation (P0.2 / P1.3)
+
+- **Run:** `results/run_20260730_152612/` — `v6_decision_framework`, seed=42, temp=0, live ISA gate
+- **Full 30:** P=0.5000 R=0.1154 F1=0.1875 Halluc=0%
+- **Set A:** P=1.0000 R=0.3333 F1=0.5000
+- **Sets B–D (first forward-registered eval):** P=R=F1=0.0000
+- Historical Set-A F1 0.4348 does **not** generalize (±0.15 falsification triggered).
+
+### Grounding vs discovery (P1.1)
+
+| Prompt | Run | Set A strict recall |
+|--------|-----|---------------------|
+| `v6_decision_framework` (gold names present) | `run_20260730_160338` | 0.4444 |
+| `v8_discovery` (zero gold names) | `run_20260730_162340` | 0.0000 (exact match) |
+
+Discovery emitted illustrative example names (`legal_encoding_subset`, `privileged_csr_intercept`) on WLRL/CSR-trap — naming contamination, not empty output.
+
+### Run-to-run variance (P1.2)
+
+| Run | P | R | F1 |
+|-----|---|---|-----|
+| `run_20260730_160338` | 1.0000 | 0.4444 | 0.6154 |
+| `run_20260730_161322` | 1.0000 | 0.4444 | 0.6154 |
+| Delta | 0 | 0 | 0 |
+
+Identical config on Set A → delta zero (parameter-name sets identical).

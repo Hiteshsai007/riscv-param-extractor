@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\csr_address_encoding.txt
+source_section: Privileged Spec, CSR Address Mapping Conventions §priv-csrs
+candidates_found: 0
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

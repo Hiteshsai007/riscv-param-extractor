@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\mconfigptr_presence.txt
+source_section: Privileged Spec, Configuration
+candidates_found: 3
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

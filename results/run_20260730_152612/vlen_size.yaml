@@ -1,0 +1,20 @@
+source_file: data\raw_snippets\vlen_size.txt
+source_section: Vector Extension Spec
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: vlen_value
+  description: The vector length VLEN is an implementation-specific power of two,
+    representing the number of bits in a single vector register.
+  type: numeric_range
+  constraints: Must be a power of two.
+  evidence: The vector length VLEN is an implementation-specific power of two, representing
+    the number of bits in a single vector register.
+  trigger_keyword: implementation-specific
+  source_section: Vector Extension Spec, VLEN Description
+  confidence: high
+  isa_visible: true
+  visibility_justification: Software can observe the VLEN value through the VTYPE
+    register.
+rejected_candidates: []
+hallucination_flags: []

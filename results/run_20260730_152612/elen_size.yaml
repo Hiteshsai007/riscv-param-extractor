@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\elen_size.txt
+source_section: Vector Extension Spec
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

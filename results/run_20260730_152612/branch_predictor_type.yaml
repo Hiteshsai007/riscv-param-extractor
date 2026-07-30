@@ -1,0 +1,12 @@
+source_file: data\raw_snippets\branch_predictor_type.txt
+source_section: Privileged Spec, Branch Predictor
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: The type of branch predictor used is implementation-specific.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []

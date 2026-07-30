@@ -11,6 +11,15 @@ This repository contains my submission for the Linux Foundation (LFX) RISC-V AI-
 **LFX Mentorship Coding Challenge — Part II**  
 **Author:** Hitesh
 
+## Check it without trusting me
+
+```bash
+./verify.sh
+# re-derives every published number offline, no model calls
+```
+
+See [CLAIM-LEDGER.md](CLAIM-LEDGER.md) for the full claim → artifact map.
+
 ## Challenge Deliverable Map
 
 | Challenge Requirement | Repository Location |
@@ -250,17 +259,50 @@ Evaluated on Set A — 10 annotated snippets (7 positive, 3 negative). Graded ag
 
 **Exact match** = both parameter `name` and `type` are identical strings. **Relaxed match** = `difflib.SequenceMatcher` ratio ≥ 0.75 on normalized names + exact `type` match. See `src/eval_harness.py` for implementation.
 
+## Evaluation Metrics (Live Unified Gate — Hardening Pass 2)
+
+Artifacts: `results/run_20260730_152612/` (full 30, prompt `v6_decision_framework`, seed=42, temp=0, live ISA-visibility gate). Graded against **current** R1-corrected gold. Re-derive: `python scripts/compute_eval_breakdown.py --results results/run_20260730_152612`.
+
+| Slice | **Precision** | **Recall** | **F1 Score** | **Hallucination Rate** | Notes |
+|-------|---------------|------------|--------------|------------------------|-------|
+| Full corpus (30) | 0.5000 | 0.1154 | 0.1875 | 0.0% | ±0.15 falsification vs historical 0.4348 **triggered** |
+| Set A only (10) | 1.0000 | 0.3333 | 0.5000 | 0.0% | Same gate; gold denominator 9 after P0.1 |
+| Sets B–D (20) | 0.0000 | 0.0000 | 0.0000 | 0.0% | **First evaluation of forward-registered set** |
+
+Gold-correction delta on historical Run 5 artifacts (informational): F1 0.4348 → 0.4545 when scored under corrected gold (`scripts/verify.py`).
+
+### Grounding vs Discovery Recall (P1.1)
+
+| Recall Type | Prompt | Run | Set A Recall (strict) |
+|-------------|--------|-----|------------------------|
+| Grounding (gold names present) | `v6_decision_framework` | `results/run_20260730_160338` | **0.4444** (full Set A) / **0.6000** on name-leaked subset |
+| Discovery (gold names absent) | `v8_discovery` | `results/run_20260730_162340` | **0.0000** |
+
+Discovery extracted the right *concepts* on WLRL/CSR-trap snippets but emitted illustrative off-evaluation example names (`legal_encoding_subset`, `privileged_csr_intercept`) — exact-match recall is therefore zero. Documented in CLAIM-LEDGER / EXPERIMENTS.
+
+### Run-to-run Variance (P1.2)
+
+Identical config (`v6`, seed=42, temp=0) on Set A, two committed runs:
+
+| Run | P | R | F1 |
+|-----|---|---|-----|
+| `results/run_20260730_160338` | 1.0000 | 0.4444 | 0.6154 |
+| `results/run_20260730_161322` | 1.0000 | 0.4444 | 0.6154 |
+| **Delta** | **0** | **0** | **0** |
+
+Per-snippet parameter-name sets were identical. Under this config, single-run figures are repeatable on Set A (delta zero).
+
 ### Recall Type Disclosure (R8)
 
 The v6 prompt includes one contrastive positive example (cache_block_size) and one negative example (WPRI) in the system prompt. The gold parameter *names* are embedded in these examples. This means the reported recall for cache_block_size and WPRI snippets measures **grounding recall** (matching against a catalogue the model has seen), not **cold discovery recall** (finding parameters the model has never been told about). For the remaining 8 snippets, no gold names appear in the prompt — those measure genuine discovery recall.
 
 | Recall Type | Snippets (n) | Recall |
 |-------------|-------------|--------|
-| Grounding (gold names in prompt) | 2 | N/A (not separately computed) |
-| Discovery (no gold names in prompt) | 8 | N/A (not separately computed) |
-| **Aggregate (reported)** | **10** | **0.5000 (strict) / 0.6000 (relaxed)** |
+| Grounding (gold names in prompt) | Set A / name-leaked subset | **0.4444 / 0.6000** (live v6 Set A — see table above) |
+| Discovery (no gold names in prompt) | Set A via `v8_discovery` | **0.0000** (exact match; see P1.1 note) |
+| **Aggregate historical (Run 5)** | **10** | **0.5000 (strict) / 0.6000 (relaxed)** |
 
-*Honest disclosure: separating these requires per-snippet recall breakdowns. The aggregate numbers overstate cold discovery ability to the extent that in-prompt examples inflate the 2 grounding snippets.*
+*Live numbers separate grounding vs discovery. Historical aggregate still conflates them.*
 
 ### Confound Reporting (R10)
 
@@ -270,10 +312,10 @@ The v6 prompt includes one contrastive positive example (cache_block_size) and o
 | Silent field-absence rejection (`isa_visible` omitted) | **Resolved — 2026-07-30** | The v6 prompt requires the field, and the gate rejects any missing/non-true value as `NOT_ISA_VISIBLE`. |
 | Hallucinated self-certification (long justification with no real ISA name) | **Resolved — 2026-07-30** | `enforce_isa_visibility_gate` and `scripts/verify_isa_claims.py` now share `justification_cites_real_mnemonic`, backed by `data/riscv_isa_index.json`. |
 | **Live gate bypass on generic justification (NEW — 2026-07-30)** | **Open** | Two independent live runs on `cache_block_size.txt` produced `cache_capacity_and_organization` with a generic justification. `cache_block_size` never appeared. |
-| Live acceptance re-test of the strict CMO rule (2026-07-30, arena sandbox) | **Blocked — environment, not gate logic** | No Ollama binary in the sandbox and no way to obtain one (direct probe: `curl https://ollama.com` → 000, `registry.ollama.ai` → 000, GitHub release-asset host `objects.githubusercontent.com` → 000), and 3.8 GB RAM vs ~4.4 GB Q4_K_M weights with no swap. Gate validation therefore remains unit-level only: 46/46 pytest pass, `scripts/verify.py` re-derives all published metrics (P 0.3846 / R 0.5000 / F1 0.4348), and `scripts/verify_isa_claims.py` runs cleanly but trivially — it checks 0 claims because every committed run predates the `isa_visible`/`visibility_justification` fields (confirmed by grep: 0 result files contain them). |
-| Missing live-run artifacts for `run_20260730_113320` | **Open — documentation-only evidence** | Commit `4b1a063`'s message claims "live validation (run_20260730_113320)", but `git rev-list --all --objects \| grep run_20260730` returns nothing and that commit adds only `src/extract.py.bak`. No committed artifacts back any post-unification live run. Any "gate works on live runs" phrasing outside this table should be treated as unverified until a live run's results directory is actually committed. |
+| Missing live-run artifacts for `run_20260730_113320` | **Superseded — Hardening Pass 2** | Historical claim remains documentation-only. **New** committed live trees: `results/run_20260730_152612` (full 30), `160338`/`161322` (Set A variance), `162340` (discovery). |
+| **Grading gold contradicts R1 doctrine for `cache_block_size` (found 2026-07-30)** | **Resolved — P0.1, 2026-07-30** | Live gold puts `cache_capacity_and_organization` in `rejected_candidates` / `NOT_ISA_VISIBLE`. Archive at `data/gold/archive/pre_r1_fix/`. |
+| Live acceptance re-test of the strict CMO rule (2026-07-30, arena sandbox) | **Blocked in arena; live-validated on maintainer machine (2026-07-30)** | Arena: no Ollama / registries / RAM. Local: Ollama `qwen2.5:7b-instruct` produced committed `isa_visible` artifacts. `cache_block_size` live extraction still yields 0 accepted params (both candidates `NOT_ISA_VISIBLE`) — gate fires; model does not recover the true positive. |
 | **ISA-index vocabulary gap → systematic false rejections at scale (found 2026-07-30)** | **Resolved — pre-registration fix, 2026-07-30** | Offline audit of all ground-truth files found **12 of 18 forward-registered `isa_visible: true` justifications could never pass the shared mnemonic check**: they cite real RISC-V names (VSETVLI, MARCHID, MIMPID, MVENDORID, MHPMCOUNTER3, PMPCFG/PMPADDR) absent from the checked-in index (44 instructions / 40 CSRs — no vector, ID, PMP, or counter CSRs). Over the expanded corpus, the live gate would have rejected correct parameters regardless of model quality — a reference-vocabulary bug masquerading as a model failure. Fixed *before any live run*: `data/riscv_isa_index.json` expanded to 48 instructions / 267 CSRs (real mnemonics only; CMO remains excluded) and the 12 GT justifications rewritten to cite indexed mnemonics, names/types unchanged. Published metrics unaffected (grading is by `data/gold` name+type on the 10-snippet evaluated set only). |
-| **Grading gold contradicts R1 doctrine for `cache_block_size` (found 2026-07-30)** | **Resolved — P0.1, 2026-07-30** | Live gold (`data/gold/positive_cases/cache_block_size.yaml`) now puts `cache_capacity_and_organization` in `rejected_candidates` with reason `NOT_ISA_VISIBLE`. Pre-correction snapshot kept at `data/gold/archive/pre_r1_fix/`. `scripts/verify.py` re-derives historical Run 5 numbers via the archive overlay and prints the F1 delta under corrected gold. Primary published metrics remain historical until a live unified-gate results tree is committed (P0.2). |
 
 The origin story took three iterations to close: first the parser leak was fixed, then the missing-field rejection was made explicit, and finally the live gate was unified with the verifier after a fabricated cache-capacity justification passed the length-only gate. These are closed failure modes, not remaining caveats; the historical runs above remain evidence of how they were found."
 
@@ -290,11 +332,11 @@ The origin story took three iterations to close: first the parser leak was fixed
 
 ### Evaluation Limitations (R12 — with falsification conditions)
 
-1. **Small N (10 snippets).** The sample is too small for statistical confidence intervals. *Falsification:* if expanding to ≥30 snippets changes F1 by more than ±0.15 from the current 0.4348, the current numbers are misleading.
+1. **Small N (10 snippets) — falsified.** Expanding to 30 snippets changed live F1 from historical 0.4348 to **0.1875** (Δ > 0.15). Historical Set-A F1 does not generalize; Sets B–D first-eval F1 = 0.0000.
 
-2. **Grounding vs discovery recall conflated.** The v6 prompt exposes 2 gold parameter names. If removing those examples drops aggregate recall by >0.1, the current recall number overstates cold discovery ability (see R8).
+2. **Grounding vs discovery — now separated (P1.1).** Discovery (`v8`) Set A exact-match recall = 0.0000 vs grounding Set A 0.4444 (Δ > 0.1). Historical aggregate overstated cold discovery.
 
-3. **No run-to-run variance reported.** With `temperature=0.0` and `seed=42`, outputs should be deterministic, but Ollama's quantization and batch scheduling may introduce non-determinism. *Falsification:* if two identical runs produce different parameter sets, the single-point metrics are unreliable.
+3. **Run-to-run variance measured (P1.2).** Two identical Set A runs (`160338` vs `161322`) → ΔP=ΔR=ΔF1=0. Under this config, single-run Set A figures are repeatable.
 
 ### Development Mistakes (R13 — honest disclosure)
 

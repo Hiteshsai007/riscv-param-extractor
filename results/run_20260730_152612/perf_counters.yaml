@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\perf_counters.txt
+source_section: Perf Counters
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

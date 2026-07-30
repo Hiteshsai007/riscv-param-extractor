@@ -43,14 +43,13 @@ HISTORICAL_EXPECTED = {
     "hallucination_rate": 0.0,  # percent
 }
 
-# Live unified-gate run — updated when a post-gate results tree is committed.
-# Set to None until P0.2 lands a committed live run.
-LIVE_RESULTS: Path | None = None
-LIVE_README_PATTERNS = {
-    "precision_strict": r"\*\*Precision\*\*\s*\|\s*([\d.]+)\s*\|",
-    "recall_strict": r"\*\*Recall\*\*\s*\|\s*([\d.]+)\s*\|",
-    "f1_strict": r"\*\*F1 Score\*\*\s*\|\s*([\d.]+)\s*\|",
-    "hallucination_rate": r"\*\*Hallucination Rate\*\*\s*\|\s*([\d.]+)%",
+# Live unified-gate run — Hardening Pass 2 primary corpus evaluation.
+LIVE_RESULTS: Path | None = Path("results/run_20260730_152612")
+LIVE_EXPECTED = {
+    "precision_strict": 0.5000,
+    "recall_strict": 0.1154,
+    "f1_strict": 0.1875,
+    "hallucination_rate": 0.0,  # percent
 }
 
 CHECKABLE_CLAIMS = {
@@ -139,21 +138,30 @@ def evaluate_historical() -> dict[str, Any]:
 
 
 def extract_live_reported_metrics(readme_path: Path) -> dict[str, float | None]:
-    """Extract primary (live) metrics table from README.md when present."""
+    """Extract full-corpus live metrics from README Live Unified Gate table if present."""
     content = readme_path.read_text(encoding="utf-8")
-    # Prefer the Live Unified Gate section if present; else first match.
     live_section = re.search(
         r"## Evaluation Metrics \(Live Unified Gate.*?\)(.*?)(?=\n## |\Z)",
         content,
         re.DOTALL,
     )
-    search_region = live_section.group(1) if live_section else content
+    if not live_section:
+        return {k: None for k in LIVE_EXPECTED}
 
-    metrics: dict[str, float | None] = {}
-    for claim_id, pattern in LIVE_README_PATTERNS.items():
-        match = re.search(pattern, search_region)
-        metrics[claim_id] = float(match.group(1)) if match else None
-    return metrics
+    region = live_section.group(1)
+    # Prefer the Full corpus row: | Full corpus (30) | P | R | F1 | Halluc |
+    row = re.search(
+        r"Full corpus \(30\)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+)%",
+        region,
+    )
+    if not row:
+        return {k: None for k in LIVE_EXPECTED}
+    return {
+        "precision_strict": float(row.group(1)),
+        "recall_strict": float(row.group(2)),
+        "f1_strict": float(row.group(3)),
+        "hallucination_rate": float(row.group(4)),
+    }
 
 
 def _print_claim_table(
@@ -243,43 +251,17 @@ def do_verify() -> None:
             "data/raw_snippets",
         )
         reported = extract_live_reported_metrics(readme_path)
-        if has_live_readme_table and any(reported[k] is not None for k in reported):
-            live_expected = {
-                "precision_strict": reported["precision_strict"],
-                "recall_strict": reported["recall_strict"],
-                "f1_strict": reported["f1_strict"],
-                "hallucination_rate": reported["hallucination_rate"],
-            }
-            # Drop claims whose README value was missing
-            live_expected = {k: v for k, v in live_expected.items() if v is not None}
-            if live_expected:
-                # Temporarily narrow CHECKABLE set via manual loop
-                print(f"\nLive Unified Gate (current gold)")
-                print(f"{'Claim':<25} {'Computed':>10} {'Expected':>10} {'Status':>8}")
-                print("-" * 60)
-                for claim_id, expected_val in live_expected.items():
-                    claim = CHECKABLE_CLAIMS[claim_id]
-                    computed_raw = resolve_report_value(live_report, claim["report_path"])
-                    transform = claim.get("transform")
-                    computed = transform(computed_raw) if transform else computed_raw
-                    if abs(computed - expected_val) > 0.01:
-                        status = "FAIL"
-                        mismatches.append(
-                            f"  live/{claim_id}: computed={computed:.4f}, "
-                            f"expected={expected_val:.4f}"
-                        )
-                    else:
-                        status = "OK"
-                    print(
-                        f"{claim_id:<25} {computed:>10.4f} {expected_val:>10.4f} {status:>8}"
-                    )
-        else:
-            agg = live_report["aggregate"]
-            print(
-                f"  Computed (no Live README table yet): "
-                f"P={agg['precision']:.4f} R={agg['recall']:.4f} "
-                f"F1={agg['f1']:.4f} Halluc={agg['hallucination_rate']*100:.1f}%"
+        live_expected = {
+            k: reported[k] if reported.get(k) is not None else LIVE_EXPECTED[k]
+            for k in LIVE_EXPECTED
+        }
+        mismatches.extend(
+            _print_claim_table(
+                "Live Unified Gate full corpus (current gold)",
+                live_report,
+                live_expected,
             )
+        )
     else:
         print(
             "\nLive unified-gate run: not yet committed "

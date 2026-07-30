@@ -1,0 +1,19 @@
+source_file: data\raw_snippets\stval_illegal_inst_behavior.txt
+source_section: Privileged Spec, Exceptions
+candidates_found: 3
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: When an illegal instruction exception occurs, implementations may
+    optionally set stval to the instruction that caused the trap.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+- candidate_text: When an illegal instruction exception occurs, implementations may
+    optionally set stval to the instruction that caused the trap.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []

@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\mimpid_value.txt
+source_section: Privileged Spec, Machine IDs
+candidates_found: 0
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

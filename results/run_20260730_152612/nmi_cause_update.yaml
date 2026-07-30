@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\nmi_cause_update.txt
+source_section: Privileged Spec, Interrupts
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

@@ -1,0 +1,14 @@
+source_file: data\raw_snippets\cmo_trigger_behavior.txt
+source_section: Unprivileged Spec, CMO §cmo — Breakpoint Exceptions
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: Memory accesses may be considered to be loads or stores depending
+    on the implementation, i.e. whether an address trigger matches on these instructions
+    when mcontrol6[load]=1 or mcontrol6[store]=1 is implementation-specific.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []

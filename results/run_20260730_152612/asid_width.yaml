@@ -1,0 +1,20 @@
+source_file: data\raw_snippets\asid_width.txt
+source_section: Privileged Spec, SATP
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: satp_asid_bits
+  description: The number of ASID bits implemented in SATP, which can vary between
+    implementations up to a maximum of 16 bits.
+  type: numeric_range
+  constraints: Up to 16 bits.
+  evidence: The number of ASID bits implemented in SATP is implementation-defined,
+    up to a maximum of 16 bits.
+  trigger_keyword: implementation-defined
+  source_section: Privileged Spec, SATP
+  confidence: high
+  isa_visible: true
+  visibility_justification: Software can observe the ASID bits by reading the SATP
+    register.
+rejected_candidates: []
+hallucination_flags: []

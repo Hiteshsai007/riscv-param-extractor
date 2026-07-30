@@ -1,0 +1,12 @@
+source_file: data\raw_snippets\stack_pointer_reset.txt
+source_section: Stack Pointer Reset
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: Software should not depend on this behavior across soft reboots.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []

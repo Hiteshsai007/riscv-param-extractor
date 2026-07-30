@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\pmp_granularity.txt
+source_section: Privileged Spec, PMP
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

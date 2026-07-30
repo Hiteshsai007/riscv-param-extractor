@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\pte_a_d_update_mechanism.txt
+source_section: Privileged Spec, Virtual Memory
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

@@ -1,0 +1,20 @@
+source_file: data\raw_snippets\misa_writability.txt
+source_section: Privileged Spec, MISA
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+- name: misa_writable
+  description: Whether the MISA CSR is writable, allowing software to enable or disable
+    extensions dynamically.
+  type: boolean
+  constraints: If writable, software can modify the CSR to enable or disable extensions.
+  evidence: Whether the misa CSR is writable is implementation-specific. If writable,
+    software can enable or disable extensions dynamically.
+  trigger_keyword: implementation-specific
+  source_section: Privileged Spec, MISA
+  confidence: high
+  isa_visible: true
+  visibility_justification: Software can read the MISA CSR to determine which extensions
+    are enabled and can write to modify the enabled extensions.
+rejected_candidates: []
+hallucination_flags: []

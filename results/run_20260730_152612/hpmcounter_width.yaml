@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\hpmcounter_width.txt
+source_section: Privileged Spec, Performance Counters
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

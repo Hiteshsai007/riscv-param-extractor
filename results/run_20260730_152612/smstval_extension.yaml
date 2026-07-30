@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\smstval_extension.txt
+source_section: Smstval Extension
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

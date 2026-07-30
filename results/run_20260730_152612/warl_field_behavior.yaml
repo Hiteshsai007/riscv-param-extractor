@@ -1,0 +1,7 @@
+source_file: data\_resume_set_a_tail\warl_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WARL
+candidates_found: 4
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

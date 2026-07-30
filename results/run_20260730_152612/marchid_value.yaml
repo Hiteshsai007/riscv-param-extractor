@@ -1,0 +1,12 @@
+source_file: data\raw_snippets\marchid_value.txt
+source_section: Privileged Spec, Machine IDs
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: The marchid CSR contains a microarchitecture ID, which is implementation-specific.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []
