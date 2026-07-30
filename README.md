@@ -186,8 +186,9 @@ Input Snippet → [Pass 1: Regex Candidate Detection] → Candidate Sentences
 ### Deterministic Hallucination Validation
 
 1. **Verbatim evidence check:** Every parameter's `evidence` field must be an exact substring of the source text. Deterministic — no LLM judgment needed.
-2. **Schema validation:** 100% of outputs must pass Pydantic validation.
-3. **Retry logic:** Malformed LLM output triggers retry (configurable, default 2).
+2. **ISA-visibility gate:** Before schema acceptance, `extract.py` requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic. The matching function in `src/isa_verification.py` is shared with `scripts/verify_isa_claims.py`, so the live gate and post-run audit use one rule.
+3. **Schema validation:** 100% of outputs must pass Pydantic validation.
+4. **Retry logic:** Malformed LLM output triggers retry (configurable, default 2).
 
 ## Project Structure
 
@@ -253,11 +254,13 @@ The v6 prompt includes one contrastive positive example (cache_block_size) and o
 
 ### Confound Reporting (R10)
 
-| Failure Class | Model-Specific? | Prompt-Specific? | Classification-Scheme-Specific? |
-|--------------|-----------------|------------------|--------------------------------|
-| **YAML formatting crash & Gate failure** | No — Both models | Yes (prompt leaked thought_process + missing isa_visible field) | No |
+| Failure class | Status | Resolution |
+|--------------|--------|------------|
+| Parser leak (`<thought_process>` text breaking YAML capture) | **Resolved — 2026-07-30** | The parser now isolates the YAML list after leaked reasoning text. |
+| Silent field-absence rejection (`isa_visible` omitted) | **Resolved — 2026-07-30** | The v6 prompt requires the field, and the gate rejects any missing/non-true value as `NOT_ISA_VISIBLE`. |
+| Hallucinated self-certification (long justification with no real ISA name) | **Resolved — 2026-07-30** | `enforce_isa_visibility_gate` and `scripts/verify_isa_claims.py` now share `justification_cites_real_mnemonic`, backed by `data/riscv_isa_index.json`. |
 
-*Phase 0 finding: The 0% extraction rate was caused by two interacting issues: (1) The LLM leaked `<thought_process>` tags outside markdown fences, breaking the naive regex parser, and (2) the v6 prompt did not instruct the LLM to output `isa_visible`, causing the new mechanical gate to silently reject all candidates. Both the parser and the prompt have been patched.*
+The origin story took three iterations to close: first the parser leak was fixed, then the missing-field rejection was made explicit, and finally the live gate was unified with the verifier after a fabricated cache-capacity justification passed the length-only gate. These are closed failure modes, not remaining caveats; the historical runs above remain evidence of how they were found."
 
 ### Cross-Model Comparison
 

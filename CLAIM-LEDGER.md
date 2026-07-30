@@ -22,11 +22,11 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 
 1. **This is NOT discovery recall.** The v6 prompt includes gold parameter names for 2 of 10 snippets. The reported recall conflates grounding recall (matching known catalogue) with cold discovery recall (finding novel parameters). See README → "Recall Type Disclosure (R8)."
 
-2. **This is NOT a multi-model finding of success.** The cross-model evaluation between Qwen 2.5 7B and Llama 3.1 8B initially revealed a prompt instruction breakdown. After fixing the formatting and the overly strict ISA-visibility gate (which silently rejected all candidates due to a missing field), we now have a working pipeline. See README -> "Confound Reporting".
+2. **This is NOT a multi-model finding of success.** The cross-model evaluation between Qwen 2.5 7B and Llama 3.1 8B initially revealed a prompt instruction breakdown. The parser leak, silent field-absence rejection, and later hallucinated self-certification are now resolved (2026-07-30), but a fresh multi-model run is still required before claiming cross-model success. See README -> "Confound Reporting".
 
 3. **This is NOT an upstream contribution to UDB.** The `generate_spec_tags.py` script produces UDB-format YAML, but no PR has been opened because the pipeline failed to produce novel, well-formatted discoveries in the final run. Cross-referencing UDB is for validation, not a contribution claim.
 
-4. **The ISA-visibility gate is enforced mechanically.** Unlike previous versions that trusted the LLM, the pipeline script itself (`extract.py`) actively enforces the 3-part ISA-visibility test and rejects candidates that the LLM incorrectly formats or fails to justify.
+4. **The ISA-visibility gate and verifier are unified (resolved 2026-07-30).** `extract.py` synchronously requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic via the shared `src/isa_verification.py` function. The verifier imports that same function. The three discovered failure modes—parser leak, silent field-absence rejection, and hallucinated self-certification—are closed; the historical origin and dates are recorded in README → "Confound Reporting".
 
 5. **Relaxed matching inflates precision/recall.** The relaxed metric uses `SequenceMatcher ≥ 0.75`, which can credit near-misses. The exact-match and relaxed-match numbers are reported side by side (R9) so the reader can judge the gap.
 
