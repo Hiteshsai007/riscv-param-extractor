@@ -1,0 +1,17 @@
+source_file: tests/bad_examples/SCHEMA_INVALID.txt
+source_section: Test §1
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+  - name: bad_schema
+    description: Missing required fields
+    type: not_a_type
+    constraints: None
+    evidence: present in source
+    trigger_keyword: may
+    source_section: Test §1
+    confidence: high
+    isa_visible: true
+    visibility_justification: The ADD instruction depends on this value.
+rejected_candidates: []
+hallucination_flags: []

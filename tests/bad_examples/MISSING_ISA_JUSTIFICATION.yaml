@@ -1,0 +1,17 @@
+source_file: tests/bad_examples/MISSING_ISA_JUSTIFICATION.txt
+source_section: Test §1
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+  - name: ambiguous_parameter
+    description: A parameter with no ISA-visibility justification.
+    type: boolean
+    constraints: None
+    evidence: implementation-defined behavior
+    trigger_keyword: implementation-defined
+    source_section: Test §1
+    confidence: high
+    isa_visible: true
+    visibility_justification: short
+rejected_candidates: []
+hallucination_flags: []

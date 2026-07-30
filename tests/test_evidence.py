@@ -68,10 +68,13 @@ class TestSchemaValidation:
             "name": "cache_block_size",
             "description": "Size of cache block",
             "type": "numeric_range",
+            "constraints": None,
             "evidence": "implementation-specific",
             "trigger_keyword": "implementation-specific",
             "source_section": "Spec §1",
             "confidence": "high",
+            "isa_visible": True,
+            "visibility_justification": "CBO.ZERO acts on cache-block-sized granules.",
         }
         is_valid, error = validate_parameter_schema(param)
         assert is_valid is True
@@ -93,10 +96,13 @@ class TestSchemaValidation:
             "name": "test",
             "description": "test",
             "type": "invalid_type",
+            "constraints": None,
             "evidence": "evidence",
             "trigger_keyword": "may",
             "source_section": "test",
             "confidence": "high",
+            "isa_visible": False,
+            "visibility_justification": "Not visible through ISA behavior.",
         }
         is_valid, error = validate_parameter_schema(param)
         assert is_valid is False

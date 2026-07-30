@@ -142,6 +142,11 @@ Highest Recall (0.5000) and F1 (0.4348) so far. `wlrl_field_behavior.txt` was pe
 
 ## Run-to-Run Variance (R7)
 
+### Identical-run variance check
+
+A dedicated repeat run was not re-executed for this repository snapshot, so the earlier variance discussion remains a prompt-comparison note rather than a true same-config variance report. The new verification workflow records this explicitly and treats identical-run variance as a separate, future check.
+
+
 **Observation:** The two closest available runs are Run 4 (v5, `run_20260717_052939`) and Run 5 (v6, `run_20260717_053803`), executed back-to-back on the same day with **identical model** (Qwen 2.5 7B), **identical temperature** (0.0), and **identical seed** (42). They differ only in prompt version.
 
 | Metric | Run 4 (v5) | Run 5 (v6) | Delta |

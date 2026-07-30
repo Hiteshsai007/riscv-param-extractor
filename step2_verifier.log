@@ -1,0 +1,90 @@
+Checked 47 ISA-visibility justifications.
+FOUND 44 UNVERIFIABLE CLAIMS:
+cache_block_size.yaml [run_20260730_092526]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties using CMO instructions.
+cache_block_size.yaml [run_20260730_093302]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties using CMO instructions.
+cache_block_size.yaml [run_20260730_110308]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties using CMO instructions.
+cache_block_size.yaml [run_20260730_111951]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties using CMO instructions.
+cache_block_size.yaml [run_llama_20260729_220806]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the cache organization and capacity through discovery mechanisms.
+cache_block_size.yaml [run_llama_20260729_220806]: Parameter 'cache_block_size' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the cache block size through discovery mechanisms.
+cbo_zero_atomicity.yaml [run_llama_20260729_220806]: Parameter 'cache_block_zero_update_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Determines how software must interact with cache-block zero instructions.
+cmo_trigger_behavior.yaml [run_llama_20260729_220806]: Parameter 'cmo_load_store_implementation' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software must adapt to the implementation's choice of load/store behavior.
+csr_trap_intercept.yaml [run_llama_20260729_220806]: Parameter 'csr_access_trap_capability' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe this trap when executing a CSR access instruction.
+elen_size.yaml [run_llama_20260729_220806]: Parameter 'vec_el_len_max' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe this maximum element length through a dedicated register or instruction.
+hpmcounter_width.yaml [run_llama_20260729_220806]: Parameter 'perf_counter_width' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the width of the performance counters.
+marchid_value.yaml [run_llama_20260729_220806]: Parameter 'marchid_microarchitecture_id' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can read back the marchid CSR to determine the microarchitecture.
+mconfigptr_presence.yaml [run_llama_20260729_220806]: Parameter 'mconfigptr_capability' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can check for the presence of mconfigptr CSR.
+misa_writability.yaml [run_llama_20260729_220806]: Parameter 'misa_csr_writable' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe this writable state when executing a CSR access instruction.
+mmu_tlb_size.yaml [run_llama_20260729_220806]: Parameter 'tlb_size_and_associativity' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the TLB behavior, but not its size and associativity.
+mvendorid_value.yaml [run_llama_20260729_220806]: Parameter 'mvendorid_manufacturer_id' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can read the mvendorid CSR to determine the manufacturer.
+nmi_cause_update.yaml [run_llama_20260729_220806]: Parameter 'mcause_nmi_update_capability' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe this update when executing a CSR access instruction.
+cache_block_size.yaml [run_qwen_20260729_214209]: Parameter 'cache_capacity_and_organization' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties to determine the capacity and organization.
+cache_block_size.yaml [run_qwen_20260729_214209]: Parameter 'cache_block_size' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the cache properties to determine the block size.
+cache_block_size.yaml [run_qwen_20260729_214209]: Parameter 'cache_block_size_uniformity' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can rely on the cache block size being uniform across the system.
+cbo_zero_atomicity.yaml [run_qwen_20260729_214209]: Parameter 'cache_block_zero_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software must be aware of the update strategy to correctly handle cache coherence and memory consistency.
+branch_predictor_type.yaml [run_qwen_20260729_220806]: Parameter 'branch_predictor_type' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the branch predictor type through various instructions or CSR reads.
+cache_block_size.yaml [run_qwen_20260729_220806]: Parameter 'cache_management_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the system to determine the actual cache management mechanisms in use.
+cbo_zero_atomicity.yaml [run_qwen_20260729_220806]: Parameter 'cache_block_zero_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software must be aware of the update strategy to correctly handle cache coherence and memory consistency.
+cmo_trigger_behavior.yaml [run_qwen_20260729_220806]: Parameter 'mcontrol6_load_store_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the behavior of address triggers based on the load/store classification.
+csr_trap_intercept.yaml [run_qwen_20260729_220806]: Parameter 'csr_access_trap_capability' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe this trap when executing a CSR access instruction.
+elen_size.yaml [run_qwen_20260729_220806]: Parameter 'elen_value' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can determine the ELEN value by reading the appropriate CSR.
+hpmcounter_width.yaml [run_qwen_20260729_220806]: Parameter 'hardware_performance_counter_width' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the counter width by querying the hardware.
+marchid_value.yaml [run_qwen_20260729_220806]: Parameter 'marchid_microarchitecture_id' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can read the marchid CSR to determine the microarchitecture ID.
+mconfigptr_presence.yaml [run_qwen_20260729_220806]: Parameter 'mconfigptr_capability' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can check if the mconfigptr CSR is present and use it if available.
+mmu_tlb_size.yaml [run_qwen_20260729_220806]: Parameter 'tlb_size' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the TLB size through TLB-related instructions and operations.
+mmu_tlb_size.yaml [run_qwen_20260729_220806]: Parameter 'tlb_associativity' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the TLB associativity through TLB-related instructions and operations.
+mvendorid_value.yaml [run_qwen_20260729_220806]: Parameter 'mvendorid_supported_values' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can read the mvendorid CSR to determine the manufacturer.
+nmi_cause_update.yaml [run_qwen_20260729_220806]: Parameter 'mcause_update_on_nmi' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the value of mcause after an NMI to determine if it was updated.
+non_coherent_agent_mechanism.yaml [run_qwen_20260729_220806]: Parameter 'non_coherent_agent_cbo_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Determines how software must interact with CBO instructions.
+perf_counters.yaml [run_qwen_20260729_220806]: Parameter 'num_programmable_performance_counters' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can query the number of counters available and their names.
+pmp_granularity.yaml [run_qwen_20260729_220806]: Parameter 'pmp_granularity' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the PMP configuration and determine the granularity.
+pte_a_d_update_mechanism.yaml [run_qwen_20260729_220806]: Parameter 'pte_update_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software must understand the mechanism to correctly interpret PTE states.
+smstval_extension.yaml [run_qwen_20260729_220806]: Parameter 'smstval_extension_supported' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can check if the extension is supported by querying the CSR.
+stval_illegal_inst_behavior.yaml [run_qwen_20260729_220806]: Parameter 'stval_set_on_exception' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the value of stval after an illegal instruction exception.
+vlen_size.yaml [run_qwen_20260729_220806]: Parameter 'vlen_value' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can determine the VLEN value by reading the VLEN CSR.
+warl_field_behavior.yaml [run_qwen_20260729_220806]: Parameter 'warl_return_value_mechanism' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can observe the returned value to determine the legal value mapping.
+wlrl_field_behavior.yaml [run_qwen_20260729_220806]: Parameter 'wlrl_supported_values' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software can read back the CSR to see which written values stick.
+wlrl_field_behavior.yaml [run_qwen_20260729_220806]: Parameter 'wlrl_illegal_write_exception' claims to be ISA-visible but its justification contains no recognizable instruction or CSR.
+  Justification: Software writing an unsupported value will either trap or proceed.

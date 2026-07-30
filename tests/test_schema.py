@@ -28,6 +28,8 @@ class TestParameterSchema:
             trigger_keyword="implementation-specific",
             source_section="Unprivileged Spec §13.1",
             confidence=ConfidenceLevel.HIGH,
+            isa_visible=True,
+            visibility_justification="CBO.ZERO operates on cache-block-sized granules.",
         )
         assert param.name == "cache_block_size"
         assert param.type == ParameterType.NUMERIC_RANGE
@@ -43,6 +45,8 @@ class TestParameterSchema:
                 trigger_keyword="may",
                 source_section="test",
                 confidence=ConfidenceLevel.LOW,
+                isa_visible=False,
+                visibility_justification="Not visible through ISA behavior.",
             )
 
     def test_empty_name_raises(self):
@@ -56,6 +60,8 @@ class TestParameterSchema:
                 trigger_keyword="may",
                 source_section="test",
                 confidence=ConfidenceLevel.LOW,
+                isa_visible=False,
+                visibility_justification="Not visible through ISA behavior.",
             )
 
     def test_field_behavior_type(self):
@@ -68,6 +74,8 @@ class TestParameterSchema:
             trigger_keyword="WARL",
             source_section="Priv Spec §2.1",
             confidence=ConfidenceLevel.HIGH,
+            isa_visible=True,
+            visibility_justification="CSRRS can expose which values the WARL field accepts.",
         )
         assert param.type == ParameterType.FIELD_BEHAVIOR
 
@@ -82,6 +90,8 @@ class TestParameterSchema:
                 trigger_keyword="may",
                 source_section="test",
                 confidence=level,
+                isa_visible=False,
+                visibility_justification="Not visible through ISA behavior.",
             )
             assert param.confidence == level
 

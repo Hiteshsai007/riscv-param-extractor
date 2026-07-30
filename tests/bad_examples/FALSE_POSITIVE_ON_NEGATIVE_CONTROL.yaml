@@ -1,0 +1,17 @@
+source_file: tests/bad_examples/FALSE_POSITIVE_ON_NEGATIVE_CONTROL.txt
+source_section: Test §1
+candidates_found: 1
+parameters_extracted: 1
+parameters:
+  - name: software_only_option
+    description: The software recommendation is not a hardware parameter.
+    type: boolean
+    constraints: None
+    evidence: software should ignore this field
+    trigger_keyword: should
+    source_section: Test §1
+    confidence: high
+    isa_visible: false
+    visibility_justification: The behavior is a software recommendation only.
+rejected_candidates: []
+hallucination_flags: []

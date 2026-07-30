@@ -143,6 +143,16 @@ Invalid YAML or unsupported fields are automatically rejected and regenerated be
 
 ---
 
+## Verification & Auditability
+
+Run ./verify.sh — every published number re-derives from committed artifacts.
+
+This repository now carries the audit trail needed for offline review:
+- [ground_truth.md](ground_truth.md) — pre-committed evaluation ledger with expected parameters and rejection reasons.
+- [verify.sh](verify.sh) — re-derives numeric claims from committed results and gold files, then re-runs the offline validator.
+- [src/validate.py](src/validate.py) — fail-closed validator for schema, evidence grounding, ISA visibility justifications, and rejection reason codes.
+- [CLAIM-LEDGER.md](CLAIM-LEDGER.md) — maps every quantitative claim in this README to the result file and script that produce it.
+
 ## Quick Start
 
 ```bash

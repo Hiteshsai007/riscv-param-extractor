@@ -11,13 +11,14 @@ stored results without re-running the LLM.
 """
 
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 from pydantic import ValidationError
 
-from schema.parameter_schema import ExtractionResult, Parameter
+from schema.parameter_schema import ExtractionResult, Parameter, RejectedCandidate, RejectionReason
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,11 @@ def validate_parameter_schema(param_dict: dict[str, Any]) -> tuple[bool, str]:
         return False, f"Unexpected error: {e}"
 
 
+def _normalize_whitespace(text: str) -> str:
+    """Collapse whitespace runs to a single space for mechanical comparison."""
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
 def validate_evidence_grounding(
     evidence: str,
     source_text: str,
@@ -56,31 +62,26 @@ def validate_evidence_grounding(
     if not evidence or not evidence.strip():
         return False, "Evidence field is empty"
 
+    normalized_evidence = _normalize_whitespace(evidence)
+    normalized_source = _normalize_whitespace(source_text)
+
+    if not normalized_evidence:
+        return False, "Evidence field is empty"
+
     if evidence in source_text:
         return True, "Evidence found verbatim in source"
 
-    # Provide diagnostic info for near-misses (helpful for debugging,
-    # but does NOT change the pass/fail result)
-    evidence_stripped = evidence.strip()
-    source_stripped = source_text.strip()
-
-    # Check if it matches after whitespace normalization (still fails, but logs why)
-    import re
-    evidence_normalized = re.sub(r'\s+', ' ', evidence_stripped)
-    source_normalized = re.sub(r'\s+', ' ', source_stripped)
-
-    if evidence_normalized in source_normalized:
+    if normalized_evidence in normalized_source:
         return False, (
             "Evidence matches after whitespace normalization but NOT verbatim. "
             "The LLM likely reformatted whitespace. This is still a hallucination "
             "by our strict definition."
         )
 
-    # Check case-insensitive (still fails)
-    if evidence_stripped.lower() in source_stripped.lower():
+    if evidence.strip().lower() in source_text.lower():
         return False, (
             "Evidence matches case-insensitively but NOT exactly. "
-            "The LLM changed capitalization."
+            "The LLM changed capitalization or punctuation."
         )
 
     return False, "Evidence NOT found in source text (hallucination)"
@@ -150,6 +151,7 @@ def validate_extraction_result(
         "evidence_grounded": 0,
         "evidence_hallucinated": 0,
         "consistency_ok": True,
+        "rejected_candidates_valid": True,
         "details": [],
     }
 
@@ -161,11 +163,9 @@ def validate_extraction_result(
             f"but len(parameters)={len(result.parameters)}"
         )
 
-    # Validate each parameter
     for param in result.parameters:
         param_report = {"name": param.name, "schema_valid": True, "evidence_grounded": True}
 
-        # Schema is already validated by Pydantic construction, but re-check
         is_valid, error = validate_parameter_schema(param.model_dump())
         if is_valid:
             report["schema_valid"] += 1
@@ -174,7 +174,6 @@ def validate_extraction_result(
             param_report["schema_valid"] = False
             param_report["schema_error"] = error
 
-        # Evidence grounding
         is_grounded, detail = validate_evidence_grounding(param.evidence, source_text)
         if is_grounded:
             report["evidence_grounded"] += 1
@@ -183,9 +182,28 @@ def validate_extraction_result(
             param_report["evidence_grounded"] = False
             param_report["evidence_detail"] = detail
 
+        if param.isa_visible and not param.visibility_justification:
+            report["details"].append({**param_report, "isa_visibility_error": "Missing visibility justification"})
+            report["rejected_candidates_valid"] = False
+        elif param.isa_visible and not re.search(r"\b(?:ADD|CBO\.ZERO|CBO\.CLEAN|CBO\.FLUSH|CBO\.INVAL|CSRRS|CSRRW|CSRRWI|CSRRC|CSRRCI|MRET|SRET|ECALL|EBREAK|FENCE|SFENCE|VSETVLI|MARCHID|MIMPID|MVENDORID|MHPMCOUNTER3|PMPADDR|PMPCFG)\b", param.visibility_justification or "", re.IGNORECASE):
+            report["details"].append({**param_report, "isa_visibility_error": "Visibility justification did not cite a real mnemonic"})
+            report["rejected_candidates_valid"] = False
+
         report["details"].append(param_report)
 
-    # R6: Heuristic evidence checks (secondary, advisory)
+    for rejected in result.rejected_candidates:
+        try:
+            RejectedCandidate(**rejected.model_dump() if hasattr(rejected, 'model_dump') else rejected)
+        except ValidationError:
+            report["rejected_candidates_valid"] = False
+            break
+        if hasattr(rejected, 'reason'):
+            try:
+                RejectionReason(rejected.reason)
+            except ValueError:
+                report["rejected_candidates_valid"] = False
+                break
+
     report["evidence_heuristic_warnings"] = []
     for param in result.parameters:
         heuristic_warnings = validate_evidence_heuristics(param.evidence, source_text)
@@ -215,8 +233,63 @@ def validate_yaml_file(yaml_path: str | Path) -> tuple[bool, str]:
         if data is None:
             return False, "YAML file is empty"
 
-        if not isinstance(data, (dict, list)):
-            return False, f"Expected dict or list, got {type(data)}"
+        if not isinstance(data, dict):
+            return False, f"Expected mapping with schema fields, got {type(data)}"
+
+        if not all(k in data for k in ["source_file", "source_section", "candidates_found", "parameters_extracted", "parameters", "rejected_candidates", "hallucination_flags"]):
+            return False, "Missing required extraction result fields"
+
+        if not isinstance(data.get("parameters"), list):
+            return False, "parameters must be a list"
+        if not isinstance(data.get("rejected_candidates"), list):
+            return False, "rejected_candidates must be a list"
+        if not isinstance(data.get("hallucination_flags"), list):
+            return False, "hallucination_flags must be a list"
+
+        for param in data.get("parameters", []):
+            if not isinstance(param, dict):
+                return False, "Each parameter must be a mapping"
+            required = ["name", "description", "type", "constraints", "evidence", "trigger_keyword", "source_section", "confidence", "isa_visible", "visibility_justification"]
+            missing = [field for field in required if field not in param]
+            if missing:
+                return False, f"Parameter missing fields: {missing}"
+            if not isinstance(param.get("name"), str) or not param.get("name").strip():
+                return False, "Parameter name must be a non-empty string"
+            if not isinstance(param.get("description"), str) or not param.get("description").strip():
+                return False, "Parameter description must be a non-empty string"
+            if not isinstance(param.get("evidence"), str) or not param.get("evidence").strip():
+                return False, "Parameter evidence must be a non-empty string"
+            if not isinstance(param.get("isa_visible"), bool):
+                return False, "Parameter isa_visible must be a bool"
+            if param.get("isa_visible") is True and (not isinstance(param.get("visibility_justification"), str) or not param.get("visibility_justification", "").strip()):
+                return False, "isa_visible=true requires visibility_justification"
+
+            source_hint = data.get("source_file")
+            source_path = None
+            if isinstance(source_hint, str):
+                source_path = Path(source_hint)
+                if not source_path.is_absolute():
+                    candidate_paths = [Path.cwd() / source_path, Path.cwd() / "data" / "raw_snippets" / source_path.name, Path.cwd() / "tests" / "bad_examples" / source_path.name]
+                    for candidate in candidate_paths:
+                        if candidate.exists():
+                            source_path = candidate
+                            break
+            if source_path is None or not source_path.exists():
+                return False, f"Source snippet not found for {data.get('source_file')}"
+            source_text = source_path.read_text(encoding="utf-8")
+            is_grounded, detail = validate_evidence_grounding(param.get("evidence"), source_text)
+            if not is_grounded:
+                return False, f"Evidence grounding failed: {detail}"
+
+        for rejection in data.get("rejected_candidates", []):
+            if not isinstance(rejection, dict):
+                return False, "Each rejected candidate must be a mapping"
+            if "reason" not in rejection:
+                return False, "Rejected candidate must include a reason"
+            try:
+                RejectionReason(rejection["reason"])
+            except ValueError:
+                return False, f"Rejected reason {rejection['reason']} is not allowed"
 
         return True, "YAML structure is valid"
 
