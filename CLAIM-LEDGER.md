@@ -44,9 +44,13 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 
 6. **Set-A gold R1 contradiction is FIXED (P0.1).** See archive + live gold.
 
-7. **The expanded 30-snippet corpus HAS been evaluated (P1.3).** Full-corpus live F1 = 0.1875. The ±0.15 falsification condition vs historical 0.4348 **triggered** — Set-A-only historical F1 does not generalize to the forward-registered Sets B–D (first-eval F1 = 0.0000).
+7. **The expanded 30-snippet corpus HAS been evaluated (P1.3).** Full-corpus live F1 = 0.1875. The ±0.15 falsification condition vs historical 0.4348 **triggered** — Set-A-only historical F1 does not generalize to the forward-registered Sets B–D (first-eval F1 = 0.0000). That failure is intentional measurement integrity, not a silent gap: see [`docs/ERROR_ANALYSIS.md`](docs/ERROR_ANALYSIS.md).
 
 8. **Discovery prompt exact-match recall is NOT “the model found nothing.”** On WLRL/CSR-trap it emitted illustrative `v8_discovery` example names (`legal_encoding_subset`, `privileged_csr_intercept`) instead of gold names — a naming contamination failure mode, not empty extraction.
+
+9. **Multi-model success is NOT claimed.** Only Qwen post-gate artifacts are committed under the unified ISA gate. Earlier incomplete Llama attempts are not advertised as cross-model success.
+
+10. **No upstream UDB PR.** [`results/udb/`](results/udb/) holds format samples. Live `cache_block_size` accepted zero parameters under the strict gate — not filing a weak PR is the correct decision.
 
 ## Metric Computation Chain
 
