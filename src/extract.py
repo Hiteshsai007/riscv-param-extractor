@@ -95,77 +95,77 @@ def _parse_yaml_from_response(response_text: str) -> tuple[list[dict[str, Any]],
     """
     Extract and parse YAML from the LLM response.
 
-    The LLM may wrap YAML in markdown code fences or include preamble text.
-    This function handles both cases and extracts parameters and rejections.
+    Supports MULTIPLE fenced YAML blocks (the model may emit two or more
+    separate ```yaml blocks). All valid items across blocks are merged.
     """
-    # The LLM frequently fails to wrap its thought process in XML tags, or breaks fences.
-    # We want to extract ONLY the YAML array.
-    # YAML arrays either start with `- name:` or are exactly `[]`.
-    
-    # Fast path for empty array (no parameters found)
-    just_brackets = re.sub(r'```(?:yaml|YAML)?|```|\s+', '', response_text)
-    if just_brackets.endswith("[]") or "[]" in response_text:
-        # If it generated [] at the end or clearly output no parameters
-        # we still need to be careful if it actually generated parameters AND [] (unlikely)
-        if "- name:" not in response_text:
+    # Fast path for empty array
+    cleaned = re.sub(r'```(?:yaml|YAML)?|```', '', response_text)
+    if cleaned.strip() in ("[]", "") and "- name:" not in response_text:
+        return [], []
+
+    # Collect ALL fenced YAML blocks (supports multiple ```yaml ... ```)
+    fence_pattern = re.compile(
+        r'```(?:yaml|YAML)?\s*\n(.*?)\n```', re.DOTALL | re.IGNORECASE
+    )
+    fenced_blocks = fence_pattern.findall(response_text)
+
+    # Also treat the whole response as one block if no fences but contains YAML list items
+    if not fenced_blocks:
+        if re.search(r'^\s*-\s+(name|candidate_text):', response_text, re.MULTILINE):
+            fenced_blocks = [response_text]
+        else:
             return [], []
 
-    # Find where the actual YAML items begin
-    lines = response_text.splitlines()
-    yaml_lines = []
-    in_yaml = False
-    
-    for line in lines:
-        stripped = line.strip()
-        
-        # Start capturing when we see the first YAML list item
-        if stripped.startswith("- name:") or stripped.startswith("- candidate_text:"):
-            in_yaml = True
-            
-        # Stop capturing if we hit a closing fence after starting
-        if in_yaml and stripped == "```":
-            break
-            
-        if in_yaml:
-            yaml_lines.append(line)
+    all_params: list[dict[str, Any]] = []
+    all_rejections: list[dict[str, Any]] = []
 
-    yaml_text = "\n".join(yaml_lines).strip()
-    
-    if not yaml_text:
-        return [], []
+    for block in fenced_blocks:
+        block = block.strip()
+        if not block or block.lower() in ("none", "null", "[]"):
+            continue
 
-    if not yaml_text or yaml_text.lower() in ("none", "null", "[]", "no parameters found"):
-        return [], []
+        # Skip thought_process blocks
+        if block.startswith("<thought_process>"):
+            continue
 
-    try:
-        parsed = yaml.safe_load(yaml_text)
-    except yaml.YAMLError as e:
-        logger.warning("YAML parse error: %s", e)
-        raise ValueError(f"Failed to parse YAML from LLM response: {e}") from e
+        try:
+            parsed = yaml.safe_load(block)
+        except yaml.YAMLError:
+            continue
 
-    # Normalize to tuple of (params, rejections)
-    if parsed is None:
-        return [], []
-    if isinstance(parsed, dict):
-        # Support if the prompt returns a dict with 'parameters' and 'rejected_candidates'
-        if "parameters" in parsed or "rejected_candidates" in parsed:
-            return (
-                parsed.get("parameters") or [],
-                parsed.get("rejected_candidates") or []
-            )
-        # Single parameter returned as dict
-        return [parsed], []
-    if isinstance(parsed, list):
-        params = []
-        rejections = []
-        for item in parsed:
-            if "candidate_text" in item and "reason" in item:
-                rejections.append(item)
+        if parsed is None:
+            continue
+
+        if isinstance(parsed, dict):
+            if "parameters" in parsed or "rejected_candidates" in parsed:
+                all_params.extend(parsed.get("parameters") or [])
+                all_rejections.extend(parsed.get("rejected_candidates") or [])
             else:
-                params.append(item)
-        return params, rejections
+                # single dict item
+                if "candidate_text" in parsed and "reason" in parsed:
+                    all_rejections.append(parsed)
+                else:
+                    all_params.append(parsed)
+        elif isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, dict):
+                    if "candidate_text" in item and "reason" in item:
+                        all_rejections.append(item)
+                    else:
+                        all_params.append(item)
 
-    raise ValueError(f"Unexpected YAML structure: {type(parsed)}")
+    # Deduplicate by name (keep first occurrence)
+    seen_names = set()
+    deduped_params = []
+    for p in all_params:
+        name = p.get("name") if isinstance(p, dict) else None
+        if name and name not in seen_names:
+            seen_names.add(name)
+            deduped_params.append(p)
+        elif not name:
+            deduped_params.append(p)
+
+    return deduped_params, all_rejections
 
 
 def _validate_evidence(parameter: Parameter, source_text: str) -> bool:

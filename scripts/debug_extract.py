@@ -75,6 +75,6 @@ print(f"  All extracted names: {names_extracted}")
 print(f"  Rejected reasons: {rejected_reasons}")
 
 if has_cache_block_size and not has_bad_param:
-    print("\n  ✓ R1 PASS: cache_block_size accepted, cache_capacity_and_organization not present")
+    print("\n  [PASS] R1 PASS: cache_block_size accepted, cache_capacity_and_organization not present")
 else:
-    print("\n  ✗ R1 PARTIAL: see details above")
+    print("\n  [FAIL] R1 PARTIAL: see details above")
