@@ -77,6 +77,20 @@ Added a self-verification step for verbatim evidence strings.
 
 ## v7_lfx_hardening.md — UDB Alignment & Anti-Hallucination Guardrails (Draft)
 
+**Change:** Draft incorporating cross-model lessons; UDB-style naming guidance. Unevaluated as of Hardening Pass 2.
+
+**Rationale:** Capture lessons from parser-leak / gate unification work without changing the evaluated-best v6 path until a dedicated run is committed.
+
+---
+
+## v8_discovery.md — Zero Gold-Name Discovery Prompt (2026-07-30, P1.1)
+
+**Change:** Same Q1→Q2→Q3 framework and ISA-visibility rules as v6, but **all contrastive example parameter names are off-evaluation** (none appear in `data/gold/`). Guarded by `scripts/check_prompt_leakage.py`.
+
+**Rationale:** Separates grounding recall (v6 embeds gold names for several Set A snippets) from cold discovery recall. Use `config/discovery.yaml` for discovery runs.
+
+**Metrics:** Populated after the discovery live run — see CLAIM-LEDGER / EXPERIMENTS.
+
 **Change:** 
 - Added a "UDB Target Alignment" section instructing the LLM to map extracted pipeline types directly to UDB schemas (`integer`, `boolean`, etc.).
 - Included strict rules explicitly forbidding markdown wrappers around the YAML block and hallucinated evidence, directly addressing the Llama 3.1 8B failure modes.

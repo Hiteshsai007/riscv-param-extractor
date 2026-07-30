@@ -1,0 +1,21 @@
+source_file: data\eval_sets\set_a\cache_block_size.txt
+source_section: Unprivileged Spec, Cache Management Operations (CMO) §cmo
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: The capacity and organization of a cache and the size of a cache
+    block are both implementation-specific, and the execution environment provides
+    software a means to discover information about the caches and cache blocks in
+    a system.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+- candidate_text: In the initial set of CMO extensions, the size of a cache block
+    shall be uniform throughout the system.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []

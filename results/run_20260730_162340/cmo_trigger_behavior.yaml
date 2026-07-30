@@ -1,0 +1,7 @@
+source_file: data\eval_sets\set_a\cmo_trigger_behavior.txt
+source_section: Unprivileged Spec, CMO §cmo — Breakpoint Exceptions
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

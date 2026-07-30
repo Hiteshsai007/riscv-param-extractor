@@ -1,0 +1,23 @@
+source_file: data\eval_sets\set_a\csr_trap_intercept.txt
+source_section: Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE
+  box)
+candidates_found: 2
+parameters_extracted: 1
+parameters:
+- name: privileged_csr_intercept
+  description: Whether the implementation allows a more-privileged level to trap otherwise
+    permitted CSR accesses.
+  type: capability
+  constraints: Must be transparent to less-privileged software.
+  evidence: Implementations might allow a more-privileged level to trap otherwise
+    permitted CSR accesses by a less-privileged level to allow these accesses to be
+    intercepted.
+  trigger_keyword: might
+  source_section: Privileged Spec, CSR Address Mapping Conventions §priv-csrs (NOTE
+    box)
+  confidence: high
+  isa_visible: true
+  visibility_justification: Software can observe this trap when executing a CSRRW
+    or CSRRS instruction.
+rejected_candidates: []
+hallucination_flags: []

@@ -1,0 +1,14 @@
+source_file: data\eval_sets\set_a\wpri_field_behavior.txt
+source_section: Privileged Spec, CSR Field Specifications §priv-csrs — WPRI
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates:
+- candidate_text: Software should ignore the values read from these fields, and should
+    preserve the values held in these fields when writing values to other fields of
+    the same register.
+  reason: NOT_ISA_VISIBLE
+  detail: ''
+  isa_visible: null
+  visibility_justification: null
+hallucination_flags: []
