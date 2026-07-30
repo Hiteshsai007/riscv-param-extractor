@@ -15,6 +15,9 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 | **Hallucination Rate** | 0.0% | `src/validate_yaml.py:validate_evidence_grounding` | `python scripts/verify.py` |
 | **YAML Validity** | 100% | `src/validate_yaml.py:validate_parameter_schema` | `python scripts/verify.py` |
 | **Ground truth precommitted** | Yes | `data/ground_truth/*.yaml` | `python scripts/check_commit_order.py` |
+| **Unit test suite** | 46/46 pass (re-run 2026-07-30) | `tests/` incl. `tests/test_isa_verification.py` (5 gate/verifier tests) | `python3 -m pytest tests/ -v` |
+| **ISA-claims verifier on committed runs** | Checked 0, exit 0 (2026-07-30) | `scripts/verify_isa_claims.py` over `results/run_20260717_*`; those files predate the visibility fields (grep: 0 files contain `isa_visible`) so 0 checked is expected, not a path bug | `python3 scripts/verify_isa_claims.py` |
+| **Reproducibility re-derivation** | 4/4 metrics match (2026-07-30) | `scripts/verify.py` re-computes P/R/F1/hallucination from committed YAMLs | `python3 scripts/verify.py` |
 
 ## Claims NOT Being Made
 
@@ -26,7 +29,7 @@ These are things this repository explicitly **does not** claim, to avoid ambigui
 
 3. **This is NOT an upstream contribution to UDB.** The `generate_spec_tags.py` script produces UDB-format YAML, but no PR has been opened because the pipeline failed to produce novel, well-formatted discoveries in the final run. Cross-referencing UDB is for validation, not a contribution claim.
 
-4. **The ISA-visibility gate and verifier are unified (resolved 2026-07-30).** `extract.py` synchronously requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic via the shared `src/isa_verification.py` function. The verifier imports that same function. The three discovered failure modes—parser leak, silent field-absence rejection, and hallucinated self-certification—are closed; the historical origin and dates are recorded in README → "Confound Reporting".
+4. **The ISA-visibility gate and verifier are unified (resolved 2026-07-30), but NOT live-validated with committed artifacts.** `extract.py` synchronously requires `isa_visible: true`, a substantive justification, and a real instruction/CSR mnemonic via the shared `src/isa_verification.py` function. The verifier imports that same function. The three discovered failure modes—parser leak, silent field-absence rejection, and hallucinated self-certification—are closed at unit level (46/46 pytest, re-run 2026-07-30); the historical origin and dates are recorded in README → "Confound Reporting". As of 2026-07-30, no post-unification live-model run has committed artifacts in this repository: `run_20260730_113320` is cited in commit `4b1a063`'s message but never appears in git history (`git rev-list --all --objects | grep run_20260730` → empty), and a live re-test attempt on 2026-07-30 was environment-blocked (no Ollama binary, model registries unreachable, 3.8 GB RAM < ~4.4 GB weights). The unification commit `a75f5b7` IS an ancestor of `origin/main` (merged via PR #1); the old `arena/019fb244-*` branch was deleted after merge, and `main` is the authoritative branch going forward.
 
 5. **Relaxed matching inflates precision/recall.** The relaxed metric uses `SequenceMatcher ≥ 0.75`, which can credit near-misses. The exact-match and relaxed-match numbers are reported side by side (R9) so the reader can judge the gap.
 
