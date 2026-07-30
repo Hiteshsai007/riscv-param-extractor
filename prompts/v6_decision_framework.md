@@ -124,6 +124,13 @@ For cache-block-size candidates, cite the CMO instruction whose operation is def
   visibility_justification: "CBO.ZERO and CBO.CLEAN operate on cache-block-sized granules, so the block size affects the address range of each instruction."
 ```
 
+### NEGATIVE: Cache capacity/organization (NOT ISA-visible)
+Source text mentions "capacity and organization are implementation-specific".
+```yaml
+[]
+```
+Reason: No concrete instruction mnemonic (e.g. CBO.ZERO, CBO.CLEAN) is cited; generic "CMO instructions" is insufficient.
+
 ### POSITIVE: Two parameters from WLRL text
 Source: "Some read/write CSR fields specify behavior for only a subset of possible bit encodings, with other bit encodings reserved. [...] Implementations are permitted but not required to raise an illegal-instruction exception if an instruction attempts to write a non-supported value to a WLRL field."
 <thought_process>

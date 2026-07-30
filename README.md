@@ -259,6 +259,7 @@ The v6 prompt includes one contrastive positive example (cache_block_size) and o
 | Parser leak (`<thought_process>` text breaking YAML capture) | **Resolved — 2026-07-30** | The parser now isolates the YAML list after leaked reasoning text. |
 | Silent field-absence rejection (`isa_visible` omitted) | **Resolved — 2026-07-30** | The v6 prompt requires the field, and the gate rejects any missing/non-true value as `NOT_ISA_VISIBLE`. |
 | Hallucinated self-certification (long justification with no real ISA name) | **Resolved — 2026-07-30** | `enforce_isa_visibility_gate` and `scripts/verify_isa_claims.py` now share `justification_cites_real_mnemonic`, backed by `data/riscv_isa_index.json`. |
+| **Live gate bypass on generic justification (NEW — 2026-07-30)** | **Open** | Two independent live runs on `cache_block_size.txt` produced `cache_capacity_and_organization` with a generic justification. `cache_block_size` never appeared. |
 
 The origin story took three iterations to close: first the parser leak was fixed, then the missing-field rejection was made explicit, and finally the live gate was unified with the verifier after a fabricated cache-capacity justification passed the length-only gate. These are closed failure modes, not remaining caveats; the historical runs above remain evidence of how they were found."
 
