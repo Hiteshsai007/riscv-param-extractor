@@ -85,6 +85,9 @@ def enforce_isa_visibility_gate(param_dict: dict) -> tuple[bool, str | None]:
         return False, "NOT_ISA_VISIBLE"
     if not justification_cites_real_mnemonic(justification):
         return False, "NOT_ISA_VISIBLE"
+    # Extra strict rule for CMO/cache snippets (live failure observed 2026-07-30)
+    if "cache" in param_dict.get("name", "").lower() and "CBO." not in justification.upper():
+        return False, "NOT_ISA_VISIBLE"
     return True, None
 
 
