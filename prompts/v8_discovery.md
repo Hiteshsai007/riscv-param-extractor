@@ -88,10 +88,10 @@ Source: "Implementations might allow a more-privileged level to trap otherwise p
 Q1: WHO has the choice? The hardware implementation ("Implementations might allow"). → Possible parameter.
 Q2: Is there variability? Yes — "might allow" means some implementations do, some don't. → Parameter.
 Q3: Variability axis? Optional hardware FEATURE. → type: capability.
-Name: privileged_csr_intercept (illustrative; not an evaluation label)
+Name: example_placeholder_capability_alpha (illustrative; not an evaluation label)
 </thought_process>
 ```yaml
-- name: "privileged_csr_intercept"
+- name: "example_placeholder_capability_alpha"
   description: "Whether the implementation allows a more-privileged level to trap otherwise permitted CSR accesses."
   type: "capability"
   constraints: "Must be transparent to less-privileged software."
@@ -141,11 +141,11 @@ Reason: "CMO.ZERO" is not a valid RISC-V instruction mnemonic (correct: CBO.ZERO
 ### POSITIVE: Field-behavior variability (WLRL-style)
 Source: "Some read/write CSR fields specify behavior for only a subset of possible bit encodings, with other bit encodings reserved. Implementations are permitted but not required to raise an illegal-instruction exception if an instruction attempts to write a non-supported value to such a field."
 <thought_process>
-Candidate 1: subset of encodings → type: field_behavior. Name: legal_encoding_subset (illustrative).
-Candidate 2: permitted but not required exception → type: boolean. Name: illegal_encoding_trap (illustrative).
+Candidate 1: subset of encodings → type: field_behavior. Name: example_placeholder_field_beta (illustrative).
+Candidate 2: permitted but not required exception → type: boolean. Name: example_placeholder_boolean_gamma (illustrative).
 </thought_process>
 ```yaml
-- name: "legal_encoding_subset"
+- name: "example_placeholder_field_beta"
   description: "Which bit encodings are legal for a CSR field that supports only a subset of encodings."
   type: "field_behavior"
   constraints: "Software should not write illegal values."
@@ -155,7 +155,7 @@ Candidate 2: permitted but not required exception → type: boolean. Name: illeg
   confidence: "high"
   isa_visible: true
   visibility_justification: "Software can read back the CSR with CSRRS to see which written values stick."
-- name: "illegal_encoding_trap"
+- name: "example_placeholder_boolean_gamma"
   description: "Whether writing a non-supported encoding raises an illegal-instruction exception."
   type: "boolean"
   constraints: "Permitted but not required — implementation choice."

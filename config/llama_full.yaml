@@ -1,0 +1,29 @@
+# Llama 3.1 config merged with default pipeline settings
+model:
+  name: "promptnow/llama-3-typhoon-v1.5-8b-instruct-q4_k_m:latest"
+  provider: "ollama"
+  base_url: "http://localhost:11434"
+  api_key: null
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+
+pipeline:
+  pass1_method: "regex"
+  max_retries: 2
+  retry_delay_seconds: 1
+  output_dir: "results_llama3_1/"
+
+prompt:
+  version: "v6_decision_framework"
+  system_role: "system"
+  user_role: "user"
+
+logging:
+  level: "INFO"
+  log_file: "results_llama3_1/pipeline.log"

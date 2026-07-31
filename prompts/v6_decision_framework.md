@@ -69,7 +69,8 @@ A single passage often contains MULTIPLE independent parameters. Examine each ca
 1. Write a `<thought_process>` block analyzing EACH candidate using the Q1→Q2→Q3 framework. DO NOT wrap this thought process in backticks or markdown code fences.
 2. Output a YAML array in ```yaml fences AFTER the thought process.
 3. Every extracted parameter MUST include `isa_visible` and `visibility_justification`.
-4. If no parameters found, output `[]`.
+4. **`visibility_justification` MUST cite at least one specific RISC-V instruction or CSR mnemonic** (e.g. CBO.ZERO, CSRRW, MISA, VSETVLI) that makes the parameter observable to software. A justification without a concrete mnemonic will be mechanically rejected.
+5. If no parameters found, output `[]`.
 
 ## Schema
 {schema}
@@ -120,9 +121,17 @@ Name: non_coherent_agent_cbo_mechanism (domain: non-coherent agent, specific: CB
 
 ### POSITIVE: Cache block size (ISA-visible)
 For cache-block-size candidates, cite the **exact instruction mnemonic**, spelled exactly as in the ISA manual: CBO.ZERO, CBO.CLEAN, CBO.FLUSH, CBO.INVAL (the prefix is CBO, not CMO). Do not claim that cache capacity or organization is ISA-visible.
+
+**CRITICAL**: Your `visibility_justification` for cache_block_size MUST name at least one of CBO.ZERO, CBO.CLEAN, CBO.FLUSH, or CBO.INVAL. Without a concrete instruction mnemonic, the parameter will be automatically rejected.
 ```yaml
 - name: "cache_block_size"
+  description: "The size of a cache block, which is implementation-specific and determines the granularity of cache management operations."
   type: "numeric_range"
+  constraints: "Must be uniform throughout the system in initial CMO extensions."
+  evidence: "the size of a cache block are both implementation-specific"
+  trigger_keyword: "implementation-specific"
+  source_section: "Unprivileged Spec, CMO §cmo"
+  confidence: "high"
   isa_visible: true
   visibility_justification: "CBO.ZERO and CBO.CLEAN operate on cache-block-sized granules, so the block size affects the address range of each instruction."
 ```

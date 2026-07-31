@@ -1,0 +1,52 @@
+run_id: '20260731_162620'
+timestamp: '2026-07-31T16:26:20.725267+00:00'
+model:
+  name: promptnow/llama-3-typhoon-v1.5-8b-instruct-q4_k_m:latest
+  provider: ollama
+  base_url: http://localhost:11434
+  api_key: null
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+pipeline:
+  pass1_method: regex
+  max_retries: 2
+  retry_delay_seconds: 1
+  output_dir: results_llama3_1/
+prompt_version: v6_decision_framework
+input_files:
+- data\raw_snippets\asid_width.txt
+- data\raw_snippets\branch_predictor_type.txt
+- data\raw_snippets\cache_block_size.txt
+- data\raw_snippets\cbo_zero_atomicity.txt
+- data\raw_snippets\cmo_trigger_behavior.txt
+- data\raw_snippets\csr_address_encoding.txt
+- data\raw_snippets\csr_trap_intercept.txt
+- data\raw_snippets\debug_csr_access.txt
+- data\raw_snippets\elen_size.txt
+- data\raw_snippets\hpmcounter_width.txt
+- data\raw_snippets\marchid_value.txt
+- data\raw_snippets\mconfigptr_presence.txt
+- data\raw_snippets\mimpid_value.txt
+- data\raw_snippets\misa_writability.txt
+- data\raw_snippets\mmu_tlb_size.txt
+- data\raw_snippets\mtvec_base_alignment.txt
+- data\raw_snippets\mvendorid_value.txt
+- data\raw_snippets\nmi_cause_update.txt
+- data\raw_snippets\non_coherent_agent_mechanism.txt
+- data\raw_snippets\perf_counters.txt
+- data\raw_snippets\pmp_granularity.txt
+- data\raw_snippets\pmp_region_count.txt
+- data\raw_snippets\pte_a_d_update_mechanism.txt
+- data\raw_snippets\smstval_extension.txt
+- data\raw_snippets\stack_pointer_reset.txt
+- data\raw_snippets\stval_illegal_inst_behavior.txt
+- data\raw_snippets\vlen_size.txt
+- data\raw_snippets\warl_field_behavior.txt
+- data\raw_snippets\wlrl_field_behavior.txt
+- data\raw_snippets\wpri_field_behavior.txt
+output_dir: results_llama3_1\run_20260731_162620

@@ -1,0 +1,7 @@
+source_file: data\raw_snippets\branch_predictor_type.txt
+source_section: Privileged Spec, Branch Predictor
+candidates_found: 2
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []
