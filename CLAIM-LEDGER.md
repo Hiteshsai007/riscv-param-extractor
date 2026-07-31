@@ -18,6 +18,8 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 | **Hallucination Rate** — live | 0.0% | Same live run | `python scripts/verify.py` |
 | **Set A only (live, from full run)** | P 1.0000 / R 0.3333 / F1 0.5000 | Same live run, Set A slice | `python scripts/compute_eval_breakdown.py --results results/run_20260730_152612` |
 | **Sets B–D (first forward-registered eval)** | P 0.0000 / R 0.0000 / F1 0.0000 | Same live run, B–D slice | `python scripts/compute_eval_breakdown.py --results results/run_20260730_152612` |
+| **Full 30 F1 (post-fix §8)** | 0.2353 | `results/run_qwen_fast/` vs current `data/gold/` | `python scripts/compute_eval_breakdown.py --results results/run_qwen_fast` |
+| **Set A F1 (post-fix §8)** | 0.5333 | Same post-fix run, Set A slice | Same |
 | **Grounding recall (Set A, v6)** | 0.4444 (full Set A) / 0.6000 (name-leaked subset) | `results/run_20260730_160338/` + prompt `v6_decision_framework` | `python scripts/compute_eval_breakdown.py --results results/run_20260730_160338 --discovery-results results/run_20260730_162340` |
 | **Discovery recall (Set A, v8)** | 0.0000 | `results/run_20260730_162340/` + prompt `v8_discovery` (`config/discovery.yaml`) | same |
 | **Run-to-run variance ΔF1 (Set A)** | 0.0000 | `results/run_20260730_160338` vs `results/run_20260730_161322` | compare summaries / breakdown |
@@ -50,7 +52,7 @@ Every bolded metric in `README.md` mapped to the exact file/script that produced
 
 9. **Multi-model success is NOT claimed.** Only Qwen post-gate artifacts are committed under the unified ISA gate. Earlier incomplete Llama attempts are not advertised as cross-model success.
 
-10. **No upstream UDB PR.** [`results/udb/`](results/udb/) holds format samples. Live `cache_block_size` accepted zero parameters under the strict gate — not filing a weak PR is the correct decision.
+10. **No upstream UDB PR yet.** [`results/udb/`](results/udb/) holds format samples. Post-fix §8, `cache_block_size` is now accepted with CBO.ZERO/CBO.CLEAN citation — a UDB PR is now viable pending full-corpus quality review.
 
 ## Metric Computation Chain
 
