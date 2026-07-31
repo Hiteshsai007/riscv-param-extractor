@@ -1,0 +1,21 @@
+pipeline:
+  pass1_method: regex
+  max_retries: 2
+  retry_delay_seconds: 1
+  output_dir: challenge/results
+
+prompt:
+  version: ../challenge/prompts/exam_v2
+
+model:
+  name: "qwen2.5:7b-instruct"
+  provider: "ollama"
+  base_url: "http://localhost:11434"
+
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192

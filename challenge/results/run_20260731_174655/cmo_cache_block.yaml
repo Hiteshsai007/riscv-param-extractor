@@ -1,0 +1,7 @@
+source_file: challenge\snippets\cmo_cache_block.txt
+source_section: Unprivileged Spec, Cache Management Operations (CMO) §cmo
+candidates_found: 1
+parameters_extracted: 0
+parameters: []
+rejected_candidates: []
+hallucination_flags: []

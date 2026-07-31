@@ -47,14 +47,18 @@ committed artifacts and fails if any disagree.
 
 ---
 
-## Coding challenge exam (2 snippets)
+## Challenge deliverable map
 
-The strict 2-snippet exam designed to test the parameter extraction pipeline against the exact LFX coding challenge requirements.
+| # | Challenge requirement | Proof |
+|---|----------------------|-------|
+| 1 | LLM details | [Deliverable 1](#deliverable-1) Â· [`config/default.yaml`](config/default.yaml) |
+| 2 | Prompt files | [`prompts/`](prompts/) Â· [`prompts/CHANGELOG.md`](prompts/CHANGELOG.md) |
+| 3 | Prompt engineering journey | [`EXPERIMENTS.md`](EXPERIMENTS.md) |
+| 4 | Hallucination mitigation | [`src/validate_yaml.py`](src/validate_yaml.py) Â· [Architecture](#architecture) |
+| 5 | Example YAML outputs | [Results](#results) Â· [`results/run_20260730_152612/`](results/run_20260730_152612/) |
+| 6 | Source code | [`src/`](src/) |
 
-- **Exam surface:** [challenge/](challenge/)
-- **Expected yield:** cache_block_size (ISA-visible; CBO.* granules) from CMO snippet; **zero** parameters from CSR snippet.
-- **Results & Predictions:** The pure prompt (zero evaluation-snippet answer strings) successfully extracted 0 parameters from the CSR snippet, but failed to extract cache_block_size because a 7B model lacks the explicit zero-shot knowledge to cite CBO.ZERO without few-shot guidance. This falsified our prediction and proved the strictness of the ISA gate. See [challenge/README.md](challenge/README.md) for the failure/decision table.
-- **Pure-prompt claim:** Guarded by [scripts/check_prompt_leakage.py](scripts/check_prompt_leakage.py).
+---
 
 ## Architecture
 
@@ -100,10 +104,6 @@ flowchart TD
 | Commit-order | Post-hoc label editing | [`scripts/check_commit_order.py`](scripts/check_commit_order.py) |
 
 ---
-
-## Extended evaluation (30 snippets)
-
-The extended 30-snippet evaluation surface tests the pipeline on a wider variety of texts.
 
 ## Key findings
 
@@ -185,32 +185,6 @@ Accepted â€” [`wlrl_field_behavior.yaml`](results/run_qwen_fast/wlrl_field_
 
 ---
 
-## Challenge deliverable map
-
-| # | Challenge requirement | Proof |
-|---|----------------------|-------|
-| 1 | LLM details | [Deliverable 1](#deliverable-1) Â· [`config/default.yaml`](config/default.yaml) |
-| 2 | Prompt files | [`prompts/`](prompts/) Â· [`prompts/CHANGELOG.md`](prompts/CHANGELOG.md) |
-| 3 | Prompt engineering journey | [`EXPERIMENTS.md`](EXPERIMENTS.md) |
-| 4 | Hallucination mitigation | [`src/validate_yaml.py`](src/validate_yaml.py) Â· [Architecture](#architecture) |
-| 5 | Example YAML outputs | [Results](#results) Â· [`results/run_20260730_152612/`](results/run_20260730_152612/) |
-| 6 | Source code | [`src/`](src/) |
-
----
-
-## Claims NOT being made
-
-Full list: [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md).
-
-| Tempting claim | Reality |
-|----------------|---------|
-| Historical recall = discovery | Only `v8_discovery` is cold naming |
-| Multi-model success | **Not claimed** â€” only Qwen post-gate artifacts are committed |
-| Upstream UDB contribution | Format samples in [`results/udb/`](results/udb/); `cache_block_size` now accepted post-fix â€” UDB PR viable pending quality review |
-| Historical F1 generalizes | Falsified (post-fix 30 F1 = 0.2353; Bâ€“D = 0) |
-
----
-
 ## Quick Start
 
 ```bash
@@ -286,6 +260,19 @@ riscv-param-extractor/
 â”œâ”€â”€ src/
 â””â”€â”€ tests/                   # + tests/bad_examples/
 ```
+
+---
+
+## Claims NOT being made
+
+Full list: [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md).
+
+| Tempting claim | Reality |
+|----------------|---------|
+| Historical recall = discovery | Only `v8_discovery` is cold naming |
+| Multi-model success | **Not claimed** â€” only Qwen post-gate artifacts are committed |
+| Upstream UDB contribution | Format samples in [`results/udb/`](results/udb/); `cache_block_size` now accepted post-fix â€” UDB PR viable pending quality review |
+| Historical F1 generalizes | Falsified (post-fix 30 F1 = 0.2353; Bâ€“D = 0) |
 
 ---
 

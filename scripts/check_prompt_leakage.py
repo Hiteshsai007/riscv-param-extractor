@@ -83,6 +83,12 @@ def main() -> None:
         action="store_true",
         help="Also fail on grounding prompts (default: allowlist them)",
     )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default=str(PROMPTS_DIR),
+        help="Directory containing prompts to check",
+    )
     args = parser.parse_args()
 
     gold_names = load_gold_names()
@@ -93,7 +99,7 @@ def main() -> None:
     print(f"Loaded {len(gold_names)} gold parameter names")
     failures: list[str] = []
 
-    for path in sorted(PROMPTS_DIR.glob("*.md")):
+    for path in sorted(Path(args.dir).glob("*.md")):
         raw = path.read_text(encoding="utf-8")
         body = strip_html_comments(raw)
 

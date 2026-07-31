@@ -1,0 +1,14 @@
+run_id: '20260731_180301'
+total_snippets: 2
+total_candidates: 1
+total_parameters: 0
+total_hallucination_flags: 0
+snippets:
+- file: challenge\snippets\cmo_cache_block.txt
+  candidates: 1
+  parameters: 0
+  hallucinations: 0
+- file: challenge\snippets\csr_address_mapping.txt
+  candidates: 0
+  parameters: 0
+  hallucinations: 0

@@ -1,0 +1,23 @@
+run_id: '20260731_174655'
+timestamp: '2026-07-31T17:46:55.430684+00:00'
+model:
+  name: qwen2.5:7b-instruct
+  provider: ollama
+  base_url: http://localhost:11434
+generation:
+  temperature: 0.0
+  top_p: 1.0
+  repetition_penalty: 1.0
+  max_tokens: 4096
+  seed: 42
+  num_ctx: 8192
+pipeline:
+  pass1_method: regex
+  max_retries: 2
+  retry_delay_seconds: 1
+  output_dir: challenge/results
+prompt_version: ../challenge/prompts/exam_v2
+input_files:
+- challenge\snippets\cmo_cache_block.txt
+- challenge\snippets\csr_address_mapping.txt
+output_dir: challenge\results\run_20260731_174655
