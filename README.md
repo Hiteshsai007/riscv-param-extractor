@@ -8,7 +8,7 @@
 [![Pydantic](https://img.shields.io/badge/Pydantic-Schema%20Validation-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/latest/)
 [![Linux Foundation](https://img.shields.io/badge/LFX-Coding%20Challenge-003778)](https://lfx.linuxfoundation.org/)
 [![Hallucination Rate](https://img.shields.io/badge/Hallucination%20Rate-0%25-2E7D52)](#results)
-[![Reproducible](https://img.shields.io/badge/Reproducible-Offline%20%E2%80%A2%20Zero%20API%20Calls-1F3A5F)](#check-it-without-trusting-me)
+[![Reproducible](https://img.shields.io/badge/Reproducible-Offline%20%E2%80%A2%20Zero%20API%20Calls-1F3A5F)](#trust-but-verify)
 
 **LFX Mentorship Coding Challenge — Part II** · **Author:** [Hitesh](https://github.com/Hiteshsai007)
 
@@ -21,7 +21,7 @@ Every bold number re-derives from committed artifacts — no API keys, no model 
 
 ## Contents
 
-- [Check it without trusting me](#check-it-without-trusting-me)
+- [Trust, but verify](#trust-but-verify)
 - [What this is](#what-this-is-one-screen)
 - [Coding challenge exam (2 snippets)](#coding-challenge-exam-2-snippets)
 - [Architecture](#architecture)
@@ -37,7 +37,7 @@ Every bold number re-derives from committed artifacts — no API keys, no model 
 
 ---
 
-## Check it without trusting me
+## Trust, but verify
 
 ```bash
 ./verify.sh
@@ -45,8 +45,9 @@ Every bold number re-derives from committed artifacts — no API keys, no model 
 # Optional: ./verify.sh --list
 ```
 
-Offline. No API keys. No model calls. Re-derives every published number from
-committed artifacts and fails if any disagree.
+No claim in this repository is asked to be taken on faith. Every published number
+re-derives offline, from committed artifacts alone — no API keys, no model calls,
+no exceptions. If any number disagrees with what's committed, the script fails.
 
 | Check | Command / artifact |
 |-------|--------------------|
